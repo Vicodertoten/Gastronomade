@@ -2,12 +2,33 @@
 
 @import "tailwindcss";
 
+:root {
+  --mv-leaf: #7EAD59;
+  --mv-coral: #F3722C;
+  --mv-amber: #FFC107;
+  --mv-red: #E63946;
+  --mv-plum: #6A2E4D;
+  --mv-cream: #FBF8F1;
+  --mv-forest: #344E41;
+  --mv-bg: var(--mv-cream);
+  --mv-text: var(--mv-forest);
+  --mv-accent: var(--mv-leaf);
+}
+
 @theme {
-  --color-beige-creme: #F5F5DC;
-  --color-vert-foret: #2F4F2F;
-  --color-vert-foret-doux: #4A5D4A;
-  --color-bois-clair: #D2B48C;
-  --color-naturel: #8B7355;
+  --color-beige-creme: var(--mv-cream);
+  --color-vert-foret: var(--mv-forest);
+  --color-vert-foret-doux: var(--mv-leaf);
+  --color-bois-clair: var(--mv-amber);
+  --color-naturel: var(--mv-plum);
+
+  --color-mv-leaf: var(--mv-leaf);
+  --color-mv-coral: var(--mv-coral);
+  --color-mv-amber: var(--mv-amber);
+  --color-mv-red: var(--mv-red);
+  --color-mv-plum: var(--mv-plum);
+  --color-mv-cream: var(--mv-cream);
+  --color-mv-forest: var(--mv-forest);
 
   --font-family-serif: 'Crimson Text', 'Times New Roman', serif;
   --font-family-sans: 'Inter', 'Helvetica Neue', sans-serif;
@@ -16,16 +37,43 @@
 /* Styles de base */
 body {
   font-family: var(--font-family-sans);
-  background-color: var(--color-beige-creme);
+  background-color: var(--mv-bg);
+  color: var(--mv-text);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-serif);
+  color: var(--mv-forest);
 }
 
-/* Classes utilitaires personnalisées */
-.bg-beige-creme { background-color: var(--color-beige-creme); }
-.text-vert-foret { color: var(--color-vert-foret); }
-.text-vert-foret-doux { color: var(--color-vert-foret-doux); }
-.bg-vert-foret { background-color: var(--color-vert-foret); }
-.border-vert-foret { border-color: var(--color-vert-foret); }
+/* Classes utilitaires personnalisées avec les nouvelles couleurs */
+.bg-beige-creme { background-color: var(--mv-cream); }
+.text-vert-foret { color: var(--mv-forest); }
+.text-vert-foret-doux { color: var(--mv-leaf); }
+.bg-vert-foret { background-color: var(--mv-forest); }
+.border-vert-foret { border-color: var(--mv-forest); }
+
+/* Nouvelles classes utilitaires */
+.bg-mv-leaf { background-color: var(--mv-leaf); }
+.bg-mv-coral { background-color: var(--mv-coral); }
+.bg-mv-amber { background-color: var(--mv-amber); }
+.bg-mv-red { background-color: var(--mv-red); }
+.bg-mv-plum { background-color: var(--mv-plum); }
+.bg-mv-cream { background-color: var(--mv-cream); }
+.bg-mv-forest { background-color: var(--mv-forest); }
+
+.text-mv-leaf { color: var(--mv-leaf); }
+.text-mv-coral { color: var(--mv-coral); }
+.text-mv-amber { color: var(--mv-amber); }
+.text-mv-red { color: var(--mv-red); }
+.text-mv-plum { color: var(--mv-plum); }
+.text-mv-cream { color: var(--mv-cream); }
+.text-mv-forest { color: var(--mv-forest); }
+
+.border-mv-leaf { border-color: var(--mv-leaf); }
+.border-mv-coral { border-color: var(--mv-coral); }
+.border-mv-amber { border-color: var(--mv-amber); }
+.border-mv-red { border-color: var(--mv-red); }
+.border-mv-plum { border-color: var(--mv-plum); }
+.border-mv-cream { border-color: var(--mv-cream); }
+.border-mv-forest { border-color: var(--mv-forest); }

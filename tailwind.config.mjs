@@ -4,12 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Palette Gastronomade - Tons naturels
-        'beige-creme': '#F5F5DC',
-        'vert-foret': '#2F4F2F',
-        'vert-foret-doux': '#4A5D4A',
-        'bois-clair': '#D2B48C',
-        'naturel': '#8B7355',
+        // Anciennes couleurs (pour compatibilité)
+        'beige-creme': 'var(--mv-cream)',
+        'vert-foret': 'var(--mv-forest)',
+        'vert-foret-doux': 'var(--mv-leaf)',
+        'bois-clair': 'var(--mv-amber)',
+        'naturel': 'var(--mv-plum)',
+
+        // Nouvelles couleurs MV
+        'mv-leaf': 'var(--mv-leaf)',
+        'mv-coral': 'var(--mv-coral)',
+        'mv-amber': 'var(--mv-amber)',
+        'mv-red': 'var(--mv-red)',
+        'mv-plum': 'var(--mv-plum)',
+        'mv-cream': 'var(--mv-cream)',
+        'mv-forest': 'var(--mv-forest)',
       },
       fontFamily: {
         // Typographie élégante
