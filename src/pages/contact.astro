@@ -28,16 +28,16 @@ const contactData = await sanityClient.fetch<ContactData>(queries.contact);
         <!-- Contact Information -->
         <div class="space-y-8">
           <div>
-            <h2 class="text-3xl font-serif font-bold text-vert-foret mb-6">
+            <h2 class="text-3xl font-serif font-bold text-mv-forest mb-6">
               Informations de contact
             </h2>
             <div class="space-y-6">
               <div class="flex items-start">
-                <svg class="h-6 w-6 text-vert-foret-doux mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="h-6 w-6 text-mv-leaf mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 <div>
-                  <h3 class="font-semibold text-gray-900 mb-1">Adresse</h3>
+                  <h3 class="font-semibold text-mv-forest mb-1">Adresse</h3>
                   <p class="text-gray-700 whitespace-pre-line">
                     {contactData?.contactInfo?.address || "190 chemin de Vieusart\n1300 Wavre"}
                   </p>

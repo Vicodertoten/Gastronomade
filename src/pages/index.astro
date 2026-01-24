@@ -15,15 +15,15 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
 
 <MainLayout title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}>
   <!-- Hero Section -->
-  <section class="bg-beige-creme py-16">
+  <section class="bg-mv-cream py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-4xl md:text-6xl font-serif font-bold text-vert-foret mb-6">
+      <h1 class="text-4xl md:text-6xl font-serif font-bold text-mv-forest mb-6">
         {homeData?.heroTitle || "Gastronomade"}
       </h1>
-      <p class="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
+      <p class="text-xl md:text-2xl text-mv-plum mb-8 max-w-3xl mx-auto">
         {homeData?.heroSubtitle || "Découvrez l'art de manger vrai avec Muriel Cruysmans à Wavre"}
       </p>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+      <p class="text-lg text-mv-forest/80 max-w-2xl mx-auto">
         {homeData?.heroDescription || "Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands"}
       </p>
     </div>
@@ -33,10 +33,10 @@ const priveLocations = locations.filter(loc => loc.type === 'prive');
   <section class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-vert-foret mb-4">
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-4">
           {homeData?.locationSectionTitle || 'Location de l\'Espace "La Zboum"'}
         </h2>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p class="text-lg text-mv-plum max-w-2xl mx-auto">
           {homeData?.locationSectionDescription || "Un cadre inspirant pour vos réunions d'entreprise, événements privés et soirées gourmandes"}
         </p>
       </div>
