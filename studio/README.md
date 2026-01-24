@@ -15,7 +15,7 @@ Studio d'administration pour gérer le contenu du site Gastronomade.
    Créer un fichier `.env.local` avec :
    ```
    SANITY_PROJECT_ID=votre-project-id
-   SANITY_DATASET=production
+   SANITY_DATASET=production. 
    ```
 
 ## Démarrage
