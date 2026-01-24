@@ -25,14 +25,14 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
 
 <MainLayout title={aboutData?.title || "Cours & Coaching - Gastronomade"}>
   <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-mv-cream to-white py-16 relative overflow-hidden">
+  <section class="bg-gradient-to-b from-gastro-cream to-white py-16 relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
    
 
-      <h1 class="text-4xl md:text-6xl font-serif font-bold text-mv-forest mb-6">
+      <h1 class="text-4xl md:text-6xl font-serif font-bold text-gastro-charcoal mb-6">
         {aboutData?.heroTitle || "Cours & Coaching"}
       </h1>
-      <p class="text-xl md:text-2xl text-mv-plum mb-8 max-w-3xl mx-auto">
+      <p class="text-xl md:text-2xl text-gastro-burgundy mb-8 max-w-3xl mx-auto">
         {aboutData?.heroSubtitle || "Apprenez l'art de la cuisine santé avec Muriel Cruysmans"}
       </p>
     </div>
@@ -42,12 +42,12 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
   <section class="py-0 bg-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-8">
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-gastro-charcoal mb-8">
           {aboutData?.aboutTitle || "À propos de Muriel"}
         </h2>
       </div>
 
-      <div class="bg-mv-cream rounded-lg p-8 md:p-12">
+      <div class="bg-gastro-cream rounded-lg p-8 md:p-12">
         <div class="grid md:grid-cols-2 gap-8 items-center">
           <div class="space-y-6">
             <p class="text-lg text-gray-700 leading-relaxed">
@@ -56,7 +56,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
             <div class="space-y-4">
               {aboutData?.achievements ? aboutData.achievements.map((achievement, index) => (
                 <div class="flex items-center">
-                  <svg class="h-5 w-5 text-mv-forest-doux mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="h-5 w-5 text-gastro-terracotta mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   <span class="text-gray-700">{achievement}</span>
@@ -64,19 +64,19 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
               )) : (
                 <>
                   <div class="flex items-center">
-                    <svg class="h-5 w-5 text-mv-forest-doux mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="h-5 w-5 text-gastro-terracotta mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
                     <span class="text-gray-700">Diplômée restaurateur-traiteur (mai 2024)</span>
                   </div>
                   <div class="flex items-center">
-                    <svg class="h-5 w-5 text-mv-forest-doux mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="h-5 w-5 text-gastro-terracotta mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
                     <span class="text-gray-700">Auteur d'un livre de recettes</span>
                   </div>
                   <div class="flex items-center">
-                    <svg class="h-5 w-5 text-mv-forest-doux mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="h-5 w-5 text-gastro-terracotta mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                     </svg>
                     <span class="text-gray-700">Spécialiste cuisine santé et bien-être</span>
@@ -113,7 +113,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
   <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-4">
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-gastro-charcoal mb-4">
           Mes Services
         </h2>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -192,15 +192,15 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
   </section>
 
   <!-- Call to Action -->
-  <section class="py-16 bg-mv-forest">
+  <section class="py-16 bg-gastro-charcoal">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-6">
+      <h2 class="text-3xl md:text-4xl font-serif font-bold text-gastro-cream mb-6">
         Prêt à commencer votre voyage culinaire ?
       </h2>
-      <p class="text-xl text-mv-cream/90 mb-8">
+      <p class="text-xl text-gastro-cream/90 mb-8">
         Contactez-moi pour un cours personnalisé ou un coaching adapté à vos besoins
       </p>
-      <a href="/contact" class="inline-block bg-mv-leaf text-mv-cream px-8 py-4 rounded-lg font-semibold hover:bg-mv-amber hover:scale-105 transition-all duration-300 transform shadow-md hover:shadow-lg">
+      <a href="/contact" class="inline-block bg-gastro-terracotta text-gastro-cream px-8 py-4 rounded-lg font-semibold hover:bg-gastro-saffron hover:scale-105 transition-all duration-300 transform shadow-md hover:shadow-lg">
         Me contacter
       </a>
     </div>

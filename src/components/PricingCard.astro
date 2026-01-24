@@ -13,23 +13,23 @@ interface Props {
 const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = false }: Props = Astro.props;
 ---
 
-<div class={`bg-white rounded-lg shadow-lg hover:shadow-xl p-6 border-2 transition-all duration-300 transform hover:-translate-y-1 ${highlight ? 'border-mv-leaf transform scale-105' : 'border-mv-cream'} relative`}>
+<div class={`bg-white rounded-lg shadow-lg hover:shadow-xl p-6 border-2 transition-all duration-300 transform hover:-translate-y-1 ${highlight ? 'border-gastro-terracotta transform scale-105' : 'border-gastro-cream'} relative`}>
 
   <div class="text-center mb-6">
-    <h3 class="text-2xl font-serif font-bold text-mv-forest mb-2">{title}</h3>
-    <p class="text-mv-plum mb-4">{subtitle}</p>
-    <div class="text-3xl font-bold text-mv-forest">
-      {price} <span class="text-lg font-normal text-mv-plum">{period}</span>
+    <h3 class="text-2xl font-serif font-bold text-gastro-charcoal mb-2">{title}</h3>
+    <p class="text-gastro-burgundy mb-4">{subtitle}</p>
+    <div class="text-3xl font-bold text-gastro-charcoal">
+      {price} <span class="text-lg font-normal text-gastro-burgundy">{period}</span>
     </div>
   </div>
 
   <ul class="space-y-3 mb-6">
     {features.map(feature => (
       <li class="flex items-start">
-        <svg class="h-5 w-5 text-mv-leaf mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <svg class="h-5 w-5 text-gastro-terracotta mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
         </svg>
-        <span class="text-mv-forest/80 text-sm">{feature}</span>
+        <span class="text-gastro-charcoal/80 text-sm">{feature}</span>
       </li>
     ))}
   </ul>
@@ -38,8 +38,8 @@ const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = 
     href={ctaLink}
     class={`block w-full text-center py-3 px-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
       highlight
-        ? 'bg-mv-leaf text-mv-cream hover:bg-mv-forest'
-        : 'bg-mv-forest text-mv-cream hover:bg-mv-leaf'
+        ? 'bg-gastro-terracotta text-gastro-cream hover:bg-gastro-charcoal'
+        : 'bg-gastro-charcoal text-gastro-cream hover:bg-gastro-terracotta'
     }`}
   >
     {ctaText}

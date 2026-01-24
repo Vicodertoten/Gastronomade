@@ -4,21 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Anciennes couleurs (pour compatibilité)
-        'beige-creme': 'var(--mv-cream)',
-        'vert-foret': 'var(--mv-forest)',
-        'vert-foret-doux': 'var(--mv-leaf)',
-        'bois-clair': 'var(--mv-amber)',
-        'naturel': 'var(--mv-plum)',
+        // Couleurs Gastro
+        'beige-creme': 'var(--gastro-cream)',
+        'terracotta': 'var(--gastro-terracotta)',
+        'safran': 'var(--gastro-saffron)',
+        'bourgogne': 'var(--gastro-burgundy)',
+        'olive': 'var(--gastro-olive)',
+        'charbon': 'var(--gastro-charcoal)',
 
-        // Nouvelles couleurs MV
-        'mv-leaf': 'var(--mv-leaf)',
-        'mv-coral': 'var(--mv-coral)',
-        'mv-amber': 'var(--mv-amber)',
-        'mv-red': 'var(--mv-red)',
-        'mv-plum': 'var(--mv-plum)',
-        'mv-cream': 'var(--mv-cream)',
-        'mv-forest': 'var(--mv-forest)',
+        // Classes Gastro complètes
+        'gastro-terracotta': 'var(--gastro-terracotta)',
+        'gastro-saffron': 'var(--gastro-saffron)',
+        'gastro-burgundy': 'var(--gastro-burgundy)',
+        'gastro-olive': 'var(--gastro-olive)',
+        'gastro-cream': 'var(--gastro-cream)',
+        'gastro-charcoal': 'var(--gastro-charcoal)',
       },
       fontFamily: {
         // Typographie élégante
