@@ -4,7 +4,7 @@ import { createClient } from '@sanity/client'
 export const sanityClient = createClient({
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET || 'production',
-  useCdn: true, // `false` si vous voulez des données fraîches
+  useCdn: false, // Changez à false pour bypass le cache
   apiVersion: '2024-01-01',
 })
 
