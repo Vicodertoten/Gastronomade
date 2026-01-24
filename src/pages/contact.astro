@@ -7,6 +7,8 @@ const contactData = await sanityClient.fetch<ContactData>(queries.contact);
 ---
 
 <MainLayout title={contactData?.title || "Contact - Gastronomade"}>
+
+
   <!-- Hero Section -->
   <section class="bg-gradient-to-b from-beige-creme to-white py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
