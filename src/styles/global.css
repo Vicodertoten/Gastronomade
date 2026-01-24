@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-beige-creme: #F5F5DC;
+  --color-vert-foret: #2F4F2F;
+  --color-vert-foret-doux: #4A5D4A;
+  --color-bois-clair: #D2B48C;
+  --color-naturel: #8B7355;
+
+  --font-family-serif: 'Crimson Text', 'Times New Roman', serif;
+  --font-family-sans: 'Inter', 'Helvetica Neue', sans-serif;
+}
+
+/* Styles de base */
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--color-beige-creme);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-serif);
+}
+
+/* Classes utilitaires personnalisées */
+.bg-beige-creme { background-color: var(--color-beige-creme); }
+.text-vert-foret { color: var(--color-vert-foret); }
+.text-vert-foret-doux { color: var(--color-vert-foret-doux); }
+.bg-vert-foret { background-color: var(--color-vert-foret); }
+.border-vert-foret { border-color: var(--color-vert-foret); }

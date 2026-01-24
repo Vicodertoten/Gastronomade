@@ -1,0 +1,47 @@
+---
+interface Props {
+  title: string;
+  subtitle: string;
+  price: string;
+  period: string;
+  features: string[];
+  ctaText: string;
+  ctaLink: string;
+  highlight?: boolean;
+}
+
+const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = false }: Props = Astro.props;
+---
+
+<div class={`bg-white rounded-lg shadow-lg p-6 border-2 ${highlight ? 'border-vert-foret transform scale-105' : 'border-gray-200'} relative`}>
+
+  <div class="text-center mb-6">
+    <h3 class="text-2xl font-serif font-bold text-vert-foret mb-2">{title}</h3>
+    <p class="text-gray-600 mb-4">{subtitle}</p>
+    <div class="text-3xl font-bold text-gray-900">
+      {price} <span class="text-lg font-normal text-gray-600">{period}</span>
+    </div>
+  </div>
+
+  <ul class="space-y-3 mb-6">
+    {features.map(feature => (
+      <li class="flex items-start">
+        <svg class="h-5 w-5 text-vert-foret-doux mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+        </svg>
+        <span class="text-gray-700 text-sm">{feature}</span>
+      </li>
+    ))}
+  </ul>
+
+  <a
+    href={ctaLink}
+    class={`block w-full text-center py-3 px-4 rounded-lg font-semibold transition-colors ${
+      highlight
+        ? 'bg-vert-foret text-white hover:bg-vert-foret-doux'
+        : 'bg-vert-foret-doux text-white hover:bg-vert-foret'
+    }`}
+  >
+    {ctaText}
+  </a>
+</div>

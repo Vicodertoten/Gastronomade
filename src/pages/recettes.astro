@@ -1,0 +1,428 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { getRecipesData, type RecipeData } from '../lib/sanity';
+
+// Récupérer les recettes depuis Sanity
+const recipes = await getRecipesData();
+
+// Fonction pour obtenir le nom de la catégorie
+function getCategoryName(category: string): string {
+  const categories: { [key: string]: string } = {
+    'entree': 'Entrée',
+    'plat': 'Plat principal',
+    'dessert': 'Dessert',
+    'boisson': 'Boisson',
+    'accompagnement': 'Accompagnement'
+  };
+  return categories[category] || category;
+}
+
+// Fonction pour obtenir la couleur de difficulté
+function getDifficultyColor(difficulty: string): string {
+  switch (difficulty) {
+    case 'facile': return 'bg-green-100 text-green-800';
+    case 'moyen': return 'bg-yellow-100 text-yellow-800';
+    case 'difficile': return 'bg-red-100 text-red-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+}
+
+// Extraire tous les tags uniques des recettes
+const allTags = new Set<string>();
+recipes.forEach(recipe => {
+  if (recipe.tags) {
+    recipe.tags.forEach(tag => allTags.add(tag));
+  }
+});
+const uniqueTags = Array.from(allTags).sort();
+---
+
+<MainLayout title="Recettes - Gastronomade">
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-beige-creme to-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-6xl font-serif font-bold text-vert-foret mb-6">
+        Recettes
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
+        Découvrez mes recettes saines et savoureuses
+      </p>
+    </div>
+  </section>
+
+  <!-- Recipes Grid -->
+  <section class="py-0 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Search and Filters -->
+      <div class="mb-12">
+        <!-- Search Bar -->
+        <div class="mb-6">
+          <div class="max-w-md mx-auto">
+            <div class="relative">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Rechercher une recette..."
+                class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vert-foret focus:border-transparent"
+              />
+              <svg class="absolute left-4 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Tags -->
+        <div class="flex flex-wrap justify-center gap-3" id="filter-buttons">
+          <button
+            class="filter-btn px-4 py-2 bg-vert-foret text-white rounded-full text-sm font-medium hover:bg-vert-foret-doux transition-colors active"
+            data-filter="all"
+          >
+            Toutes ({recipes.length})
+          </button>
+          {uniqueTags.map(tag => (
+            <button
+              class="filter-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-vert-foret hover:text-white transition-colors"
+              data-filter={tag}
+            >
+              {tag.charAt(0).toUpperCase() + tag.slice(1)} ({recipes.filter(r => r.tags?.includes(tag)).length})
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {recipes && recipes.length > 0 ? (
+        <!-- Recipes Grid -->
+        <div id="recipes-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {recipes.map((recipe) => (
+            <article
+              class="recipe-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
+              data-title={recipe.title.toLowerCase()}
+              data-description={recipe.description?.toLowerCase() || ''}
+              data-tags={recipe.tags?.join(',').toLowerCase() || ''}
+              data-category={recipe.category}
+            >
+              {recipe.featuredImage && (
+                <div class="h-48 bg-gray-200">
+                  <img
+                    src={`${recipe.featuredImage}?w=400&h=300&fit=crop&auto=format`}
+                    alt={recipe.title}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div class="p-6">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium text-vert-foret bg-vert-foret/10 px-2 py-1 rounded">
+                    {getCategoryName(recipe.category)}
+                  </span>
+                  {recipe.difficulty && (
+                    <span class={`text-xs font-medium px-2 py-1 rounded ${getDifficultyColor(recipe.difficulty)}`}>
+                      {recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1)}
+                    </span>
+                  )}
+                </div>
+
+                <h3 class="text-xl font-serif font-bold text-gray-900 mb-2">
+                  {recipe.title}
+                </h3>
+
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                  {recipe.description}
+                </p>
+
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  {recipe.prepTime && (
+                    <span>⏱️ {recipe.prepTime}min</span>
+                  )}
+                  {recipe.servings && (
+                    <span>👥 {recipe.servings} pers.</span>
+                  )}
+                </div>
+
+                {recipe.tags && recipe.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-1 mb-4">
+                    {recipe.tags.slice(0, 3).map((tag) => (
+                      <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <a
+                  href={`/recette/${recipe.slug?.current || recipe._id}`}
+                  class="inline-block w-full text-center bg-vert-foret text-white px-4 py-2 rounded-lg font-medium hover:bg-vert-foret-doux transition-colors"
+                >
+                  Voir la recette
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <!-- Recipes Coming Soon -->
+        <div class="text-center py-16">
+          <div class="max-w-2xl mx-auto">
+            <svg class="mx-auto h-24 w-24 text-vert-foret-doux mb-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <h2 class="text-3xl font-serif font-bold text-vert-foret mb-4">
+              Recettes à venir
+            </h2>
+            <p class="text-lg text-gray-600 mb-8">
+              Je prépare une collection de recettes saines et délicieuses pour vous accompagner dans votre voyage culinaire.
+            </p>
+            <div class="bg-beige-creme rounded-lg p-6 inline-block">
+              <p class="text-gray-700">
+                <strong>Prochainement :</strong> Recettes connectées au CMS pour une expérience interactive
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recipe Preview Cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+          <!-- Recipe Card 1 -->
+          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+            <div class="aspect-video bg-gray-200 flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <p class="text-sm">Photo recette</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-serif font-bold text-vert-foret mb-2">
+                Salade d'été aux herbes
+              </h3>
+              <p class="text-gray-600 mb-4">
+                Une salade fraîche et légère, parfaite pour les journées ensoleillées.
+              </p>
+              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>⏱️ 15 min</span>
+                <span>👥 4 pers.</span>
+                <span>📊 Facile</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-1 bg-vert-foret-doux text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-bois-clair text-gray-800 text-xs rounded-full">Rapide</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recipe Card 2 -->
+          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+            <div class="aspect-video bg-gray-200 flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <p class="text-sm">Photo recette</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-serif font-bold text-vert-foret mb-2">
+                Soupe de légumes d'automne
+              </h3>
+              <p class="text-gray-600 mb-4">
+                Un velouté réconfortant aux saveurs d'automne, riche en nutriments.
+              </p>
+              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>⏱️ 45 min</span>
+                <span>👥 6 pers.</span>
+                <span>📊 Moyen</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-1 bg-vert-foret-doux text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-naturel text-white text-xs rounded-full">Thermomix</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recipe Card 3 -->
+          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+            <div class="aspect-video bg-gray-200 flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <p class="text-sm">Photo recette</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-serif font-bold text-vert-foret mb-2">
+                Quinoa aux légumes grillés
+              </h3>
+              <p class="text-gray-600 mb-4">
+                Un plat complet et équilibré, source de protéines végétales.
+              </p>
+              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>⏱️ 30 min</span>
+                <span>👥 4 pers.</span>
+                <span>📊 Facile</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-1 bg-vert-foret-doux text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-bois-clair text-gray-800 text-xs rounded-full">Rapide</span>
+                <span class="px-2 py-1 bg-naturel text-white text-xs rounded-full">Saison</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('search-input');
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      const recipeCards = document.querySelectorAll('.recipe-card');
+      const recipesGrid = document.getElementById('recipes-grid');
+
+      let currentFilter = 'all';
+      let currentSearch = '';
+
+      // Fonction pour filtrer les recettes
+      function filterRecipes() {
+        const visibleCards = [];
+        let visibleCount = 0;
+
+        recipeCards.forEach(card => {
+          const title = card.dataset.title || '';
+          const description = card.dataset.description || '';
+          const tags = card.dataset.tags || '';
+          const category = card.dataset.category || '';
+
+          // Vérifier la recherche textuelle
+          const matchesSearch = currentSearch === '' ||
+            title.includes(currentSearch) ||
+            description.includes(currentSearch) ||
+            tags.includes(currentSearch);
+
+          // Vérifier le filtre
+          let matchesFilter = false;
+          if (currentFilter === 'all') {
+            matchesFilter = true;
+          } else {
+            matchesFilter = tags.includes(currentFilter.toLowerCase());
+          }
+
+          // Afficher/cacher la carte
+          if (matchesSearch && matchesFilter) {
+            card.style.display = 'block';
+            visibleCards.push(card);
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        // Mettre à jour la grille si nécessaire
+        if (visibleCount === 0) {
+          if (!recipesGrid.querySelector('.no-results')) {
+            const noResults = document.createElement('div');
+            noResults.className = 'no-results col-span-full text-center py-16';
+            noResults.innerHTML = `
+              <div class="max-w-md mx-auto">
+                <svg class="mx-auto h-24 w-24 text-vert-foret-doux mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-.966-5.5-2.5"/>
+                </svg>
+                <h3 class="text-2xl font-serif font-bold text-vert-foret mb-4">
+                  Aucune recette trouvée
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Essayez de modifier vos critères de recherche ou de filtre.
+                </p>
+                <button onclick="resetFilters()" class="bg-vert-foret text-white px-6 py-3 rounded-lg font-medium hover:bg-vert-foret-doux transition-colors">
+                  Voir toutes les recettes
+                </button>
+              </div>
+            `;
+            recipesGrid.appendChild(noResults);
+          }
+        } else {
+          const noResults = recipesGrid.querySelector('.no-results');
+          if (noResults) {
+            noResults.remove();
+          }
+        }
+
+        // Mettre à jour les compteurs des boutons
+        updateButtonCounts();
+      }
+
+      // Fonction pour mettre à jour les compteurs des boutons
+      function updateButtonCounts() {
+        filterButtons.forEach(button => {
+          const filter = button.dataset.filter;
+          let count = 0;
+
+          if (filter === 'all') {
+            count = recipeCards.length;
+          } else {
+            recipeCards.forEach(card => {
+              const tags = card.dataset.tags || '';
+              if (tags.includes(filter.toLowerCase())) {
+                count++;
+              }
+            });
+          }
+
+          // Extraire le texte du bouton sans le compteur
+          const buttonText = button.textContent.replace(/\s*\(\d+\)$/, '');
+          button.textContent = `${buttonText} (${count})`;
+        });
+      }
+
+      // Fonction pour réinitialiser les filtres
+      window.resetFilters = function() {
+        currentFilter = 'all';
+        currentSearch = '';
+        searchInput.value = '';
+
+        // Réinitialiser les boutons
+        filterButtons.forEach(btn => {
+          btn.classList.remove('active', 'bg-vert-foret', 'text-white');
+          btn.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        filterButtons[0].classList.add('active', 'bg-vert-foret', 'text-white');
+        filterButtons[0].classList.remove('bg-gray-200', 'text-gray-700');
+
+        filterRecipes();
+      };
+
+      // Écouteur pour la recherche
+      searchInput.addEventListener('input', function(e) {
+        currentSearch = e.target.value.toLowerCase().trim();
+        filterRecipes();
+      });
+
+      // Écouteurs pour les boutons de filtre
+      filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const filter = this.dataset.filter;
+
+          // Réinitialiser tous les boutons
+          filterButtons.forEach(btn => {
+            btn.classList.remove('active', 'bg-vert-foret', 'text-white');
+            btn.classList.add('bg-gray-200', 'text-gray-700');
+          });
+
+          // Activer le bouton cliqué
+          this.classList.add('active', 'bg-vert-foret', 'text-white');
+          this.classList.remove('bg-gray-200', 'text-gray-700');
+
+          currentFilter = filter;
+          filterRecipes();
+        });
+      });
+
+      // Initialiser avec le bouton "Toutes" actif
+      filterButtons[0].classList.add('active');
+    });
+  </script>
+</MainLayout>

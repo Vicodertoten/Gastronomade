@@ -1,0 +1,95 @@
+---
+// NewsletterSignup.astro - Composant d'inscription à la newsletter
+---
+
+<div id="newsletter-signup" class="bg-beige-creme rounded-lg p-6 my-8">
+  <div class="text-center">
+    <h3 class="text-xl font-serif font-bold text-vert-foret mb-2">
+      Restez informé(e)
+    </h3>
+    <p class="text-gray-600 mb-4">
+      Recevez mes dernières recettes et conseils nutritionnels directement dans votre boîte mail.
+    </p>
+
+    <form id="newsletter-form" class="max-w-md mx-auto">
+      <div class="flex gap-2">
+        <input
+          type="email"
+          id="newsletter-email"
+          placeholder="Votre adresse email"
+          class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vert-foret focus:border-transparent"
+          required
+        />
+        <button
+          type="submit"
+          id="newsletter-submit"
+          class="bg-vert-foret text-white px-6 py-2 rounded-lg hover:bg-vert-foret-doux transition-colors font-medium"
+        >
+          S'inscrire
+        </button>
+      </div>
+      <p id="newsletter-message" class="text-sm mt-2 opacity-0 transition-opacity"></p>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('newsletter-form') as HTMLFormElement;
+    const emailInput = document.getElementById('newsletter-email') as HTMLInputElement;
+    const submitButton = document.getElementById('newsletter-submit') as HTMLButtonElement;
+    const messageElement = document.getElementById('newsletter-message') as HTMLParagraphElement;
+
+    const showMessage = (message: string, isError: boolean = false) => {
+      messageElement.textContent = message;
+      messageElement.className = `text-sm mt-2 transition-opacity ${isError ? 'text-red-600' : 'text-green-600'}`;
+      messageElement.style.opacity = '1';
+
+      setTimeout(() => {
+        messageElement.style.opacity = '0';
+      }, 5000);
+    };
+
+    const setLoading = (loading: boolean) => {
+      submitButton.disabled = loading;
+      submitButton.textContent = loading ? 'Inscription...' : 'S\'inscrire';
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        showMessage('Veuillez saisir votre adresse email', true);
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const response = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage(data.message);
+          emailInput.value = '';
+        } else {
+          showMessage(data.error || 'Une erreur est survenue', true);
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        showMessage('Erreur de connexion. Veuillez réessayer.', true);
+      } finally {
+        setLoading(false);
+      }
+    });
+  });
+</script>

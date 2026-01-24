@@ -1,0 +1,211 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import PricingCard from '../components/PricingCard.astro';
+import { sanityClient, queries, type LocationData, type RestaurantData, type HomeData } from '../lib/sanity';
+
+// Récupérer les données depuis Sanity
+const locations = await sanityClient.fetch<LocationData[]>(queries.locations);
+const restaurantData = await sanityClient.fetch<RestaurantData>(queries.restaurant);
+const homeData = await sanityClient.fetch<HomeData>(queries.home);
+
+// Organiser les locations par type
+const societeLocations = locations.filter(loc => loc.type === 'societe');
+const priveLocations = locations.filter(loc => loc.type === 'prive');
+---
+
+<MainLayout title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}>
+  <!-- Hero Section -->
+  <section class="bg-beige-creme py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-6xl font-serif font-bold text-vert-foret mb-6">
+        {homeData?.heroTitle || "Gastronomade"}
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
+        {homeData?.heroSubtitle || "Découvrez l'art de manger vrai avec Muriel Cruysmans à Wavre"}
+      </p>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        {homeData?.heroDescription || "Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands"}
+      </p>
+    </div>
+  </section>
+
+  <!-- Gastronomade Section -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-vert-foret mb-4">
+          {homeData?.locationSectionTitle || 'Location de l\'Espace "La Zboum"'}
+        </h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          {homeData?.locationSectionDescription || "Un cadre inspirant pour vos réunions d'entreprise, événements privés et soirées gourmandes"}
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Sociétés -->
+        {societeLocations.length > 0 ? (
+          <PricingCard
+            title={societeLocations[0].title}
+            subtitle={societeLocations[0].subtitle || "Réunions & Team-Buildings"}
+            price={societeLocations[0].price}
+            period="HTVA"
+            features={societeLocations[0].features}
+            ctaText="Réserver pour mon équipe"
+            ctaLink="/contact"
+          />
+        ) : (
+          <PricingCard
+            title="Sociétés"
+            subtitle="Réunions & Team-Buildings"
+            price="400€"
+            period="HTVA"
+            features={[
+              "Cadre inspirant et chaleureux",
+              "Cuisine entièrement équipée",
+              "Parking privé",
+              "Accès facile via E411",
+              "Espace modulable selon vos besoins"
+            ]}
+            ctaText="Réserver pour mon équipe"
+            ctaLink="/contact"
+          />
+        )}
+
+        <!-- Privé -->
+        {priveLocations.length > 0 ? (
+          <PricingCard
+            title={priveLocations[0].title}
+            subtitle={priveLocations[0].subtitle || "Événements personnels"}
+            price={priveLocations[0].price}
+            period="HTVA"
+            features={priveLocations[0].features}
+            ctaText="Organiser mon événement"
+            ctaLink="/contact"
+          />
+        ) : (
+          <PricingCard
+            title="Privé"
+            subtitle="Événements personnels"
+            price="400€"
+            period="HTVA"
+            features={[
+              "Anniversaires et célébrations",
+              "Réunions de famille",
+              "Dîners entre amis",
+              "Espace privatif et cosy",
+              "Service personnalisé"
+            ]}
+            ctaText="Organiser mon événement"
+            ctaLink="/contact"
+          />
+        )}
+
+        <!-- Restaurant -->
+        <PricingCard
+          title="Restaurant"
+          subtitle={restaurantData?.subtitle || "Un jeudi soir par mois"}
+          price={restaurantData?.price ? `${restaurantData.price}€` : "50€"}
+          period="/pers."
+          features={[
+            restaurantData?.menuDescription || "Menu unique du chef",
+            `Réservation minimum ${restaurantData?.minGuests || 4} personnes`,
+            `Acompte de ${restaurantData?.depositAmount || 25}€ par personne`,
+            "Ambiance conviviale",
+            "Produits frais et locaux"
+          ]}
+          ctaText="Réserver une table"
+          ctaLink="#restaurant-section"
+          highlight="true"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Restaurant Section -->
+  <section id="restaurant-section" class="py-16 bg-beige-creme">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-vert-foret mb-4">
+          {homeData?.restaurantSectionTitle || 'Restaurant Gastronomade'}
+        </h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          {homeData?.restaurantSectionDescription || "Découvrez notre carte saisonnière et nos événements culinaires"}
+        </p>
+      </div>
+
+      <!-- Restaurant Content -->
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 class="text-xl font-serif font-bold text-vert-foret mb-4">{restaurantData?.menuTitle || "Menu du Chef"}</h3>
+              <p class="text-gray-600 mb-4">
+                {restaurantData?.menuDescription || "Un menu unique élaboré avec des produits frais et locaux, changeant selon les saisons"}
+              </p>
+              <div class="text-2xl font-bold text-vert-foret">
+                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-gray-600">par personne</span>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-xl font-serif font-bold text-vert-foret mb-4">{restaurantData?.datesTitle || "Prochaines Dates"}</h3>
+              <div class="space-y-2">
+                {restaurantData?.dates && restaurantData.dates.length > 0 ? (
+                  restaurantData.dates.slice(0, 4).map((date, index) => (
+                    <div key={index} class="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span class="text-gray-700">{date}</span>
+                      <span class="text-vert-foret font-medium">2026</span>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span class="text-gray-700">Jeudi 5 mars</span>
+                      <span class="text-vert-foret font-medium">2026</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span class="text-gray-700">Jeudi 9 avril</span>
+                      <span class="text-vert-foret font-medium">2026</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span class="text-gray-700">Jeudi 21 mai</span>
+                      <span class="text-vert-foret font-medium">2026</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span class="text-gray-700">Jeudi 11 juin</span>
+                      <span class="text-vert-foret font-medium">2026</span>
+                    </div>
+                  </>
+                )}
+              </div>
+              <div class="mt-4 text-center">
+                <a href="/contact" class="inline-block bg-vert-foret text-white px-6 py-2 rounded-lg font-medium hover:bg-vert-foret-doux transition-colors">
+                  Réserver
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action Section -->
+  <section class="py-16 bg-vert-foret-doux">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-serif font-bold text-white mb-6">
+        {homeData?.ctaTitle || "Prêt à vivre une expérience gastronomique unique ?"}
+      </h2>
+      <p class="text-xl text-white/90 mb-8">
+        {homeData?.ctaDescription || "Contactez Muriel pour réserver votre espace ou découvrir ses services"}
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact" class="bg-white text-vert-foret px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+          {homeData?.ctaPrimaryButton || "Me contacter"}
+        </a>
+        <a href="/about" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-vert-foret transition-colors">
+          {homeData?.ctaSecondaryButton || "En savoir plus"}
+        </a>
+      </div>
+    </div>
+  </section>
+</MainLayout>

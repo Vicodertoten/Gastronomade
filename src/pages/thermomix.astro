@@ -1,0 +1,126 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { sanityClient, queries, type ThermomixData } from '../lib/sanity';
+
+// Fonction helper pour convertir les URLs YouTube en URLs d'embed
+function getEmbedUrl(url: string): string {
+  if (!url) return '';
+
+  // YouTube
+  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const youtubeMatch = url.match(youtubeRegex);
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+  }
+
+  // Vimeo
+  const vimeoRegex = /vimeo\.com\/(\d+)/;
+  const vimeoMatch = url.match(vimeoRegex);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+
+  // Retourner l'URL telle quelle si ce n'est pas YouTube ou Vimeo
+  return url;
+}
+
+// Récupérer les données Thermomix depuis Sanity
+const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix);
+---
+
+<MainLayout title="Thermomix - Gastronomade">
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-beige-creme to-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-6xl font-serif font-bold text-vert-foret mb-6">
+        Thermomix
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
+        Découvrez la révolution culinaire avec Muriel Cruysmans
+      </p>
+    </div>
+  </section>
+
+  <!-- Content Grid -->
+  <section class="py-0 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <!-- Video Section -->
+        <div class="space-y-6">
+          {thermomixData?.videoUrl && (
+            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+              <iframe
+                src={getEmbedUrl(thermomixData.videoUrl)}
+                class="w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          )}
+          {thermomixData?.demoRecipes && thermomixData.demoRecipes.length > 0 && (
+            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+              <iframe
+                src={getEmbedUrl(thermomixData.demoRecipes[0].videoUrl)}
+                class="w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          )}
+        </div>
+
+        <!-- Text Content -->
+        <div class="space-y-6">
+          <h2 class="text-3xl font-serif font-bold text-vert-foret">
+            Révolutionnez votre cuisine
+          </h2>
+          {thermomixData?.monthlyText ? (
+            <p class="text-gray-700 text-lg leading-relaxed">
+              {thermomixData.monthlyText}
+            </p>
+          ) : (
+            <p class="text-gray-700 text-lg leading-relaxed">
+              Le Thermomix est bien plus qu'un robot culinaire. C'est votre assistant personnel pour préparer des repas sains, savoureux et équilibrés en un temps record.
+            </p>
+          )}
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <svg class="h-6 w-6 text-vert-foret-doux mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <div>
+                <h3 class="font-semibold text-gray-900">Préparation rapide</h3>
+                <p class="text-gray-600">Préparez des repas complets en 30 minutes</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <svg class="h-6 w-6 text-vert-foret-doux mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <div>
+                <h3 class="font-semibold text-gray-900">Alimentation saine</h3>
+                <p class="text-gray-600">Contrôlez les ingrédients et les quantités</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <svg class="h-6 w-6 text-vert-foret-doux mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <div>
+                <h3 class="font-semibold text-gray-900">Polyvalence</h3>
+                <p class="text-gray-600">Hacher, mixer, cuire, mijoter... tout est possible</p>
+              </div>
+            </div>
+          </div>
+          <div class="pt-6">
+            <a href="/contact" class="inline-block bg-vert-foret text-white px-8 py-4 rounded-lg font-semibold hover:bg-vert-foret-doux transition-colors">
+              S'inscrire à un cours Thermomix
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</MainLayout>

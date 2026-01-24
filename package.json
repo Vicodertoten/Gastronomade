@@ -1,0 +1,24 @@
+{
+  "name": "lunar-limit",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "studio": "cd studio && npm run dev",
+    "studio:build": "cd studio && npm run build"
+  },
+  "dependencies": {
+    "@sanity/client": "^6.29.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.16.15",
+    "tailwindcss": "^4.1.18"
+  },
+  "description": "```sh npm create astro@latest -- --template minimal ```",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
