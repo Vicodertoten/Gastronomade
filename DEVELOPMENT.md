@@ -139,12 +139,21 @@ SANITY_API_VERSION=2024-01-01
 - **Types**: Générés automatiquement via TypeScript
 
 ### Newsletter Subscriptions
-Les inscriptions à la newsletter utilisent **Netlify Forms** pour la collecte automatique :
+Les inscriptions à la newsletter utilisent **Netlify Forms** avec un **modal de confirmation** :
 
 - **Netlify Dashboard** : Données accessibles dans Forms > Active forms
+- **Modal de succès** : Popup élégant s'affichant sur la même page
 - **Export CSV** : Téléchargeable directement depuis Netlify
-- **Spam protection** : Filtrage automatique inclus
-- **Page de succès** : Redirection vers `/merci` après inscription
+- **Protection anti-spam** : Filtrage automatique inclus
+
+#### Outil Newsletter dans Sanity Studio
+Un outil dédié permet de gérer les abonnés directement dans le Studio :
+- **Visualisation** : Liste complète des abonnés avec dates d'inscription
+- **Export CSV** : Téléchargement direct depuis l'interface
+- **Statistiques** : Nombre total d'abonnés
+- **Actualisation** : Bouton pour rafraîchir les données
+
+**Accès** : Menu latéral > Newsletter > Gestion des abonnés
 
 Le système enregistre automatiquement : email, date, et métadonnées Netlify.
 

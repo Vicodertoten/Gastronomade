@@ -27,6 +27,28 @@ npm run dev
 
 Le studio sera accessible sur `http://localhost:3333`
 
+## 📧 Outil Newsletter
+
+Un outil dédié permet de gérer facilement les inscriptions à la newsletter :
+
+### Fonctionnalités
+- **📊 Statistiques** : Nombre total d'abonnés
+- **👥 Liste des abonnés** : Email, date d'inscription, statut
+- **📥 Export CSV** : Téléchargement direct des données
+- **🔄 Actualisation** : Rafraîchir les données en temps réel
+
+### Utilisation
+1. Dans le menu latéral, cliquer sur **"Newsletter"**
+2. Sélectionner **"Gestion des abonnés"**
+3. Voir la liste complète des inscriptions
+4. Cliquer sur **"Exporter en CSV"** pour télécharger
+
+### Données exportées
+Le CSV contient les colonnes suivantes :
+- `Email` : Adresse email de l'abonné
+- `Date d'inscription` : Date et heure d'inscription
+- `Statut` : "Actif" ou "Inactif"
+
 ## Schémas disponibles
 
 ### 🏠 Restaurant Éphémère

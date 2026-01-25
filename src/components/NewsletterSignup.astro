@@ -11,7 +11,7 @@
       Recevez mes dernières recettes et conseils nutritionnels directement dans votre boîte mail.
     </p>
 
-    <form id="newsletter-form" name="newsletter" method="POST" data-netlify="true" action="/merci" class="max-w-md mx-auto">
+    <form id="newsletter-form" name="newsletter" method="POST" data-netlify="true" class="max-w-md mx-auto">
       <!-- Champ caché requis par Netlify Forms -->
       <input type="hidden" name="form-name" value="newsletter" />
       <div class="flex gap-2">
@@ -36,19 +36,114 @@
   </div>
 </div>
 
+<!-- Modal de remerciement -->
+<div id="newsletter-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+    <!-- Bouton de fermeture -->
+    <button id="modal-close" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+
+    <!-- Contenu du modal -->
+    <div class="text-center">
+      <div class="mb-4">
+        <svg class="mx-auto h-12 w-12 text-mv-leaf" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+
+      <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
+        Merci pour votre inscription !
+      </h3>
+
+      <p class="text-mv-forest/80 mb-6 leading-relaxed">
+        Votre inscription à la newsletter a bien été enregistrée. Vous recevrez bientôt mes dernières recettes et conseils nutritionnels.
+      </p>
+
+      <button id="modal-ok" class="bg-mv-leaf text-mv-cream px-6 py-2 rounded-lg font-semibold hover:bg-mv-forest transition-colors">
+        Parfait !
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
-  // Amélioration UX pour Netlify Forms
+  // Gestionnaire du modal de remerciement
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('newsletter-form') as HTMLFormElement;
     const submitButton = document.getElementById('newsletter-submit') as HTMLButtonElement;
+    const modal = document.getElementById('newsletter-modal') as HTMLElement;
+    const modalClose = document.getElementById('modal-close') as HTMLButtonElement;
+    const modalOk = document.getElementById('modal-ok') as HTMLButtonElement;
 
-    // Indicateur de chargement pendant la soumission
-    form.addEventListener('submit', () => {
-      submitButton.disabled = true;
-      submitButton.textContent = 'Inscription...';
+    // Fonction pour afficher le modal
+    const showModal = () => {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden'; // Empêcher le scroll
+    };
+
+    // Fonction pour cacher le modal
+    const hideModal = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = ''; // Restaurer le scroll
+    };
+
+    // Gestionnaires d'événements pour fermer le modal
+    modalClose.addEventListener('click', hideModal);
+    modalOk.addEventListener('click', hideModal);
+
+    // Fermer le modal en cliquant en dehors
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        hideModal();
+      }
     });
 
-    // Netlify Forms gère automatiquement la redirection vers /merci
-    // en cas de succès, ou affiche les erreurs directement
+    // Fermer le modal avec la touche Échap
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        hideModal();
+      }
+    });
+
+    // Gestionnaire de soumission du formulaire
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Désactiver le bouton et montrer le chargement
+      submitButton.disabled = true;
+      submitButton.textContent = 'Inscription...';
+
+      try {
+        // Créer les données du formulaire
+        const formData = new FormData(form);
+
+        // Envoyer à Netlify Forms
+        const response = await fetch('/', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          // Succès : afficher le modal et réinitialiser le formulaire
+          showModal();
+          form.reset();
+        } else {
+          // Erreur : afficher un message d'erreur
+          alert('Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
+        }
+      } catch (error) {
+        console.error('Erreur lors de l\'inscription:', error);
+        alert('Erreur de connexion. Veuillez vérifier votre connexion internet et réessayer.');
+      } finally {
+        // Réactiver le bouton
+        submitButton.disabled = false;
+        submitButton.textContent = 'S\'inscrire';
+      }
+    });
   });
 </script>

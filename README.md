@@ -97,16 +97,16 @@ Voir le guide complet dans [`DEVELOPMENT.md`](./DEVELOPMENT.md) pour:
 
 Les inscriptions utilisent **Netlify Forms** :
 - **Dashboard Netlify** : Gestion et export CSV automatique
-- **Page de succès** : `/merci` après inscription
+- **Modal de confirmation** : Popup élégant sur la même page
 - **Protection anti-spam** : Incluse par défaut
 
-### Test de l'inscription
+### Gestion des abonnés (Sanity Studio)
 ```bash
-# Démarrer le serveur local
-npm run dev
+# Accéder au studio d'administration
+npm run studio
 
-# Tester le formulaire dans le navigateur
-# Les données apparaissent dans le dashboard Netlify après déploiement
+# Dans le menu latéral : Newsletter > Gestion des abonnés
+# Voir la liste, exporter en CSV, statistiques
 ```
 
 ## 📊 CMS Sanity
