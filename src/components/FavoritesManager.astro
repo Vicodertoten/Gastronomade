@@ -33,7 +33,7 @@
 
           this.updateButton(button, recipeId);
         }
-      });
+      }, { capture: true });
 
       // Mettre à jour tous les boutons favoris existants
       this.updateAllButtons();
@@ -88,7 +88,7 @@
       if (icon) {
         icon.classList.toggle('fill-current', isFav);
         icon.classList.toggle('text-mv-coral', isFav);
-        icon.classList.toggle('text-gray-400', !isFav);
+        icon.classList.toggle('text-mv-forest-60', !isFav);
       }
 
       if (text) {
@@ -138,6 +138,14 @@
         const data = localStorage.getItem('gastronomade-favorites');
         if (data) {
           this.favorites = new Set(JSON.parse(data));
+          return;
+        }
+
+        const legacy = localStorage.getItem('recipeFavorites');
+        if (legacy) {
+          this.favorites = new Set(JSON.parse(legacy));
+          this.saveToStorage();
+          localStorage.removeItem('recipeFavorites');
         }
       } catch (error) {
         console.error('Erreur lors du chargement des favoris:', error);
@@ -155,12 +163,12 @@
 
       return `
         <button
-          class="favorite-btn ${sizeClasses[size]} rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 border border-gray-200"
+          class="favorite-btn ${sizeClasses[size]} rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 border border-mv-leaf-20"
           data-recipe-id="${recipeId}"
           data-recipe-title="${recipeTitle}"
           aria-label="Ajouter aux favoris"
         >
-          <svg class="favorite-icon h-5 w-5 text-gray-400 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="favorite-icon h-5 w-5 text-mv-forest-60 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
           </svg>
           <span class="favorite-text sr-only">Ajouter aux favoris</span>

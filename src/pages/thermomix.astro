@@ -8,97 +8,175 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
 ---
 
 <MainLayout title="Thermomix - Gastronomade">
-  <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-mv-cream to-white py-12 sm:py-16 lg:py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
-        Thermomix
-      </h1>
-      <p class="text-lg sm:text-xl md:text-2xl text-mv-forest-80 mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
-        Découvrez la révolution culinaire avec Muriel Cruysmans
-      </p>
-    </div>
-  </section>
-
-  <!-- Content Grid -->
-  <section class="pb-12 sm:pb-16 lg:pb-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
-        <!-- Video Section -->
-        <div class="space-y-4 sm:space-y-6 order-2 lg:order-1">
-          {thermomixData?.videoUrl && (
-            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden shadow-sm">
-              <iframe
-                src={getEmbedUrl(thermomixData.videoUrl)}
-                class="w-full h-full"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                title="Vidéo de présentation Thermomix"
-              ></iframe>
+  <section class="relative overflow-hidden bg-gradient-to-b from-mv-cream via-white to-mv-cream/30 mv-section">
+    {thermomixData?.featuredImageUrl && (
+      <div class="absolute inset-0 hidden lg:block">
+        <div
+          class="absolute inset-0 bg-cover bg-center"
+          style={`background-image: url(${thermomixData.featuredImageUrl}?w=1800&auto=format);`}
+          aria-hidden="true"
+        ></div>
+        <div
+          class="absolute inset-0 bg-[linear-gradient(to_left,transparent_0%,transparent_33%,rgba(255,255,255,0.6)_52%,rgba(255,255,255,0.92)_72%,white_100%),linear-gradient(to_bottom,rgba(251,248,241,0)_80%,rgba(251,248,241,1)_100%)]"
+          aria-hidden="true"
+        ></div>
+      </div>
+    )}
+    <div class="relative mv-container">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+          <p class="mv-kicker">Thermomix</p>
+          <h1 class="mv-hero-title">
+            Le robot qui cuisine avec vous, pas à votre place.
+          </h1>
+          <p class="mv-lead">
+            Le Thermomix pèse, hache, mixe, cuit et mijote dans un seul bol. Il guide chaque étape grâce à ses recettes intégrées : vous gardez la main, il vous simplifie la vie.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="rounded-2xl bg-white shadow-sm border border-mv-leaf-20 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60 mb-2">1</p>
+              <h3 class="text-sm font-semibold text-mv-forest">Guidage clair</h3>
+              <p class="text-sm text-mv-forest-70">Écran pas à pas pour gagner du temps.</p>
             </div>
-          )}
-          {thermomixData?.demoRecipes && thermomixData.demoRecipes.length > 0 && (
-            <div class="aspect-video bg-gray-200 rounded-lg overflow-hidden shadow-sm">
-              <iframe
-                src={getEmbedUrl(thermomixData.demoRecipes[0].videoUrl)}
-                class="w-full h-full"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                title="Démo recette Thermomix"
-              ></iframe>
+            <div class="rounded-2xl bg-white shadow-sm border border-mv-leaf-20 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60 mb-2">2</p>
+              <h3 class="text-sm font-semibold text-mv-forest">Cuisson précise</h3>
+              <p class="text-sm text-mv-forest-70">Température maîtrisée sans surveillance.</p>
+            </div>
+            <div class="rounded-2xl bg-white shadow-sm border border-mv-leaf-20 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-mv-forest-60 mb-2">3</p>
+              <h3 class="text-sm font-semibold text-mv-forest">Vaisselle réduite</h3>
+              <p class="text-sm text-mv-forest-70">Un seul appareil pour tout faire.</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a
+              href="https://www.instagram.com/manger_vrai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream transition-all duration-300"
+            >
+              Suivre @manger_vrai
+            </a>
+            <a
+              href="https://www.youtube.com/@murielcruysmans5423/shorts"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mv-btn mv-btn-primary bg-mv-leaf text-mv-cream hover:bg-mv-forest transition-all duration-300"
+            >
+              Voir les vidéos YouTube
+            </a>
+          </div>
+        </div>
+        <div class="lg:col-span-5">
+          {thermomixData?.videoUrl && (
+            <div class="rounded-3xl overflow-hidden shadow-lg border border-mv-leaf-20 bg-white">
+              <div class="aspect-video bg-mv-cream">
+                <iframe
+                  src={getEmbedUrl(thermomixData.videoUrl)}
+                  class="w-full h-full"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  title="Vidéo de présentation Thermomix"
+                ></iframe>
+              </div>
+              <div class="p-4 sm:p-5">
+                <p class="text-sm text-mv-forest-70">
+                  Une présentation rapide pour comprendre l’essentiel avant une démo.
+                </p>
+              </div>
             </div>
           )}
         </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Text Content -->
-        <div class="space-y-4 sm:space-y-6 order-1 lg:order-2">
-          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-mv-forest mb-3 leading-tight">
-            Révolutionnez votre cuisine
-          </h2>
-          {thermomixData?.monthlyText ? (
-            <p class="text-mv-forest-80 text-base sm:text-lg leading-relaxed">
-              {thermomixData.monthlyText}
+  <section class="mv-section bg-white">
+    <div class="mv-container">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div class="lg:col-span-5">
+          <div class="rounded-3xl border border-mv-coral-20 bg-mv-coral-20 p-6 sm:p-8 shadow-sm">
+            {thermomixData?.featuredImageUrl && (
+              <div class="mb-5 overflow-hidden rounded-2xl border border-mv-coral-20 bg-white">
+                <img
+                  src={`${thermomixData.featuredImageUrl}?w=900&h=600&fit=crop&auto=format`}
+                  alt="Promo Thermomix"
+                  class="h-48 w-full object-cover sm:h-56"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            <p class="mv-kicker mb-3">Promo du mois</p>
+            <h2 class="mv-section-title mb-3">
+              Offres & avantages en cours
+            </h2>
+            <p class="mv-lead">
+              {thermomixData?.monthlyText
+                ? thermomixData.monthlyText
+                : "Chaque mois, des conditions préférentielles et des surprises pour démarrer sereinement avec votre Thermomix."}
             </p>
-          ) : (
-            <p class="text-mv-forest-80 text-base sm:text-lg leading-relaxed">
-              Le Thermomix est bien plus qu'un robot culinaire. C'est votre assistant personnel pour préparer des repas sains, savoureux et équilibrés en un temps record.
-            </p>
-          )}
-          <div class="space-y-3 sm:space-y-4">
-            <div class="flex items-start">
-              <svg class="h-5 sm:h-6 w-5 sm:w-6 text-mv-leaf mr-3 sm:mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              <div>
-                <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Préparation rapide</h3>
-                <p class="text-mv-forest-70 text-sm sm:text-base">Préparez des repas complets en 30 minutes</p>
-              </div>
+          </div>
+        </div>
+        <div class="lg:col-span-7 space-y-4 sm:space-y-5">
+          <h3 class="mv-section-title">Pourquoi en profiter maintenant</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-mv-leaf-20 p-4">
+              <p class="text-sm font-semibold text-mv-forest">Accompagnement personnalisé</p>
+              <p class="text-sm text-mv-forest-70">Installation, prise en main et premiers menus.</p>
             </div>
-            <div class="flex items-start">
-              <svg class="h-5 sm:h-6 w-5 sm:w-6 text-mv-leaf mr-3 sm:mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              <div>
-                <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Alimentation saine</h3>
-                <p class="text-mv-forest-70 text-sm sm:text-base">Contrôlez les ingrédients et les quantités</p>
-              </div>
+            <div class="rounded-2xl border border-mv-leaf-20 p-4">
+              <p class="text-sm font-semibold text-mv-forest">Recettes adaptées</p>
+              <p class="text-sm text-mv-forest-70">Des idées simples pour votre rythme.</p>
             </div>
-            <div class="flex items-start">
-              <svg class="h-5 sm:h-6 w-5 sm:w-6 text-mv-leaf mr-3 sm:mr-4 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              <div>
-                <h3 class="font-semibold text-mv-forest text-sm sm:text-base">Polyvalence</h3>
-                <p class="text-mv-forest-70 text-sm sm:text-base">Hacher, mixer, cuire, mijoter... tout est possible</p>
-              </div>
+            <div class="rounded-2xl border border-mv-leaf-20 p-4">
+              <p class="text-sm font-semibold text-mv-forest">Suivi continu</p>
+              <p class="text-sm text-mv-forest-70">On reste en contact après l’achat.</p>
+            </div>
+            <div class="rounded-2xl border border-mv-leaf-20 p-4">
+              <p class="text-sm font-semibold text-mv-forest">Premiers pas réussis</p>
+              <p class="text-sm text-mv-forest-70">Astuces pour gagner du temps au quotidien.</p>
             </div>
           </div>
-          <div class="pt-4 sm:pt-6">
-            <a href="/contact" class="inline-block bg-mv-leaf text-mv-cream px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-mv-forest transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 shadow-md hover:shadow-lg">
-              S'inscrire à un cours Thermomix
+          <a href="/contact" class="inline-flex items-center gap-2 text-mv-forest font-semibold hover:text-mv-leaf transition-colors">
+            Recevoir le détail de la promo →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mv-section bg-gradient-to-b from-white to-mv-cream/60">
+    <div class="mv-container">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div class="lg:col-span-7 space-y-5">
+          <h2 class="mv-section-title">
+            Démo en direct chaque mardi soir
+          </h2>
+          <p class="mv-lead">
+            Venez découvrir le Thermomix en action, poser vos questions et goûter le résultat. Démo prévue tous les mardis soir — et si ce créneau ne vous convient pas, contactez-moi pour trouver un autre moment.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/contact" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf transition-all duration-300">
+              Réserver une démo
             </a>
+            <a href="/contact" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream transition-all duration-300">
+              Demander un autre créneau
+            </a>
+          </div>
+        </div>
+        <div class="lg:col-span-5">
+          <div class="rounded-3xl border border-mv-leaf-20 bg-white p-6 sm:p-8 shadow-sm space-y-4">
+            <div>
+              <p class="mv-kicker mb-2">À prévoir</p>
+              <p class="text-sm text-mv-forest-80">Durée : 60 à 90 min • Groupe réduit</p>
+            </div>
+            <div class="h-px bg-mv-leaf-20"></div>
+            <div>
+              <p class="mv-kicker mb-2">Où</p>
+              <p class="text-sm text-mv-forest-80">Chez moi ou à convenir selon disponibilité.</p>
+            </div>
           </div>
         </div>
       </div>

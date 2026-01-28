@@ -1,13 +1,11 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import SimpleRecipeFilters from '../components/SimpleRecipeFilters.astro';
-import Breadcrumbs from '../components/Breadcrumbs.astro';
+import RecipeFilters from '../components/RecipeFilters.astro';
 import EnhancedRecipeCard from '../components/EnhancedRecipeCard.astro';
 import MicroInteractions from '../components/MicroInteractions.astro';
 import SpacingOptimizer from '../components/SpacingOptimizer.astro';
 import ShoppingList from '../components/ShoppingList.astro';
 import FavoritesManager from '../components/FavoritesManager.astro';
-import LazyImage from '../components/LazyImage.astro';
 import AnimationOptimizer from '../components/AnimationOptimizer.astro';
 import { getRecipesData, type RecipeData } from '../lib/sanity';
 
@@ -19,43 +17,13 @@ const url = new URL(Astro.request.url);
 const searchQuery = url.searchParams.get('search') || '';
 const selectedCategory = url.searchParams.get('category') || '';
 const selectedDifficulty = url.searchParams.get('difficulty') || '';
-const selectedTags = url.searchParams.getAll('tags');
-
-// Fonction pour filtrer les recettes
-function filterRecipes(recipes: RecipeData[], filters: { search: string; category: string; difficulty: string; tags: string[] }) {
-  return recipes.filter(recipe => {
-    // Recherche textuelle
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      const matchesSearch =
-        recipe.title.toLowerCase().includes(searchLower) ||
-        recipe.description?.toLowerCase().includes(searchLower) ||
-        recipe.ingredients?.some(ing => ing.name.toLowerCase().includes(searchLower));
-      if (!matchesSearch) return false;
-    }
-
-    // Filtre par catégorie
-    if (filters.category && recipe.category !== filters.category) {
-      return false;
-    }
-
-    // Filtre par difficulté
-    if (filters.difficulty && recipe.difficulty !== filters.difficulty) {
-      return false;
-    }
-
-    // Filtre par tags
-    if (filters.tags.length > 0) {
-      const recipeTags = recipe.tags || [];
-      const hasMatchingTag = filters.tags.some(filterTag =>
-        recipeTags.some(recipeTag => recipeTag.toLowerCase().includes(filterTag.toLowerCase()))
-      );
-      if (!hasMatchingTag) return false;
-    }
-
-    return true;
-  });
-}
+const selectedTime = url.searchParams.get('time') || '';
+const selectedBudget = url.searchParams.get('budget') || '';
+const selectedSort = url.searchParams.get('sort') || '';
+const tagsParam = url.searchParams.get('tags') || url.searchParams.getAll('tags').join(',');
+const selectedTags = (tagsParam || '').split(',').filter(Boolean);
+const selectedDiet = (url.searchParams.get('diet') || '').split(',').filter(Boolean);
+const selectedSeason = (url.searchParams.get('season') || '').split(',').filter(Boolean);
 
 // Pour le filtrage dynamique, on passe toutes les recettes au composant
 const allRecipes = recipes;
@@ -72,6 +40,34 @@ function getCategoryName(category: string): string {
   return categories[category] || category;
 }
 
+function normalizeString(value?: string | null): string {
+  return (value ?? '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+function normalizeCategoryValue(category?: string | null): string {
+  const normalized = normalizeString(category);
+  const aliases: Record<string, string[]> = {
+    entree: ['entree', 'entrees', 'entrée', 'entrées'],
+    plat: ['plat', 'plats', 'plat principal', 'plats principaux'],
+    dessert: ['dessert', 'desserts'],
+    boisson: ['boisson', 'boissons'],
+    accompagnement: ['accompagnement', 'accompagnements']
+  };
+
+  for (const [value, variants] of Object.entries(aliases)) {
+    if (variants.some((variant) => normalizeString(variant) === normalized)) {
+      return value;
+    }
+  }
+
+  return category;
+}
+
 // Extraire tous les tags uniques de toutes les recettes
 const allTags = new Set<string>();
 allRecipes.forEach(recipe => {
@@ -80,6 +76,77 @@ allRecipes.forEach(recipe => {
   }
 });
 const uniqueTags = Array.from(allTags).sort();
+
+const allDiets = new Set<string>();
+allRecipes.forEach(recipe => {
+  if (recipe.diet) {
+    recipe.diet.forEach(diet => allDiets.add(diet));
+  }
+});
+
+const allSeasons = new Set<string>();
+allRecipes.forEach(recipe => {
+  if (recipe.season) {
+    recipe.season.forEach(season => allSeasons.add(season));
+  }
+});
+
+const allBudgets = new Set<string>();
+allRecipes.forEach(recipe => {
+  if (recipe.budget) {
+    allBudgets.add(recipe.budget);
+  }
+});
+
+const categoryCounts = new Map<string, number>();
+allRecipes.forEach(recipe => {
+  if (!recipe.category) return;
+  const normalizedCategory = normalizeCategoryValue(recipe.category);
+  categoryCounts.set(normalizedCategory, (categoryCounts.get(normalizedCategory) || 0) + 1);
+});
+
+const categories = Array.from(categoryCounts.entries())
+  .map(([value, count]) => ({
+    value,
+    label: getCategoryName(value),
+    count
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const dietLabels: { [key: string]: string } = {
+  'vegetarien': 'Végétarien',
+  'vegan': 'Vegan',
+  'pescetarien': 'Pescétarien',
+  'sans-gluten': 'Sans gluten',
+  'sans-lactose': 'Sans lactose',
+  'sans-sucre': 'Sans sucre raffiné',
+  'ig-bas': 'IG bas'
+};
+
+const seasonLabels: { [key: string]: string } = {
+  'printemps': 'Printemps',
+  'ete': 'Été',
+  'automne': 'Automne',
+  'hiver': 'Hiver'
+};
+
+const budgetLabels: { [key: string]: string } = {
+  'economique': 'Économique',
+  'intermediaire': 'Intermédiaire',
+  'genereux': 'Généreux'
+};
+
+const availableDiets = Array.from(allDiets)
+  .map(value => ({ value, label: dietLabels[value] || value }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const availableSeasons = Array.from(allSeasons)
+  .map(value => ({ value, label: seasonLabels[value] || value }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const budgets = Array.from(allBudgets)
+  .map(value => ({ value, label: budgetLabels[value] || value }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 // Préparer les données pour les composants
 const recipeCardsData = allRecipes.map(recipe => ({
@@ -90,20 +157,41 @@ const recipeCardsData = allRecipes.map(recipe => ({
   image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : undefined,
   prepTime: recipe.prepTime,
   cookTime: recipe.cookTime,
+  restTime: recipe.restTime,
+  servings: recipe.servings,
   difficulty: recipe.difficulty,
-  category: recipe.category,
-  rating: recipe.rating || 4.5,
+  category: getCategoryName(normalizeCategoryValue(recipe.category)),
+  categoryValue: normalizeCategoryValue(recipe.category),
+  rating: recipe.rating,
   isNew: recipe.isNew || false,
   isPopular: recipe.isPopular || false,
   tags: recipe.tags,
   ingredients: recipe.ingredients ? recipe.ingredients.map(ing => ing.name) : []
 }));
 
-// Fil d'Ariane
-const breadcrumbs = [
-  { label: 'Accueil', href: '/' },
-  { label: 'Recettes', current: true }
-];
+const recipesIndex = allRecipes.map(recipe => ({
+  id: recipe._id,
+  slug: recipe.slug?.current || recipe._id,
+  title: recipe.title,
+  description: recipe.description,
+  category: normalizeCategoryValue(recipe.category),
+  difficulty: recipe.difficulty,
+  prepTime: recipe.prepTime || 0,
+  cookTime: recipe.cookTime || 0,
+  restTime: recipe.restTime || 0,
+  servings: recipe.servings,
+  rating: recipe.rating || 0,
+  isNew: recipe.isNew || false,
+  isPopular: recipe.isPopular || false,
+  publishedAt: recipe.publishedAt,
+  tags: recipe.tags || [],
+  diet: recipe.diet || [],
+  season: recipe.season || [],
+  budget: recipe.budget || '',
+  ingredients: recipe.ingredients || []
+}));
+
+
 ---
 
 <MainLayout title="Recettes - Gastronomade">
@@ -114,46 +202,42 @@ const breadcrumbs = [
   <FavoritesManager />
   <ShoppingList />
 
-  <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-mv-cream to-white py-12 sm:py-16 lg:py-20 scroll-fade-in" role="banner">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
-        Recettes
-      </h1>
-      <p class="text-lg sm:text-xl md:text-2xl text-mv-plum mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
-        Découvrez mes recettes saines et savoureuses
-      </p>
-    </div>
-  </section>
-
   <!-- Recipes Section -->
   <section class="py-0 bg-white scroll-fade-in">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Breadcrumbs -->
-      <Breadcrumbs items={breadcrumbs} />
-
+    <div class="mv-container">
       <!-- Recipe Filters -->
-      <SimpleRecipeFilters
+      <RecipeFilters
         currentFilters={{
           search: searchQuery,
           category: selectedCategory,
           difficulty: selectedDifficulty,
-          tags: selectedTags
+          time: selectedTime,
+          budget: selectedBudget,
+          tags: selectedTags,
+          diet: selectedDiet,
+          season: selectedSeason,
+          sort: selectedSort
         }}
         availableTags={uniqueTags}
+        availableDiets={availableDiets}
+        availableSeasons={availableSeasons}
+        categories={categories}
+        budgets={budgets}
         totalRecipes={allRecipes.length}
       />
 
       {allRecipes && allRecipes.length > 0 ? (
         <!-- Enhanced Recipes Grid -->
-        <div id="recipes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8" role="grid">
+        <div id="recipes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-7" role="grid">
           {recipeCardsData.map((recipe, index) => (
-            <div class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`} style={`animation-delay: ${index * 0.1}s`}>
+            <div
+              class={`scroll-fade-in ${index % 2 === 0 ? 'scroll-slide-in-left' : 'scroll-slide-in-right'}`}
+              style={`animation-delay: ${index * 0.1}s`}
+              data-recipe-card
+              data-recipe-id={recipe.id}
+            >
               <EnhancedRecipeCard
-                recipe={{
-                  ...recipe,
-                  category: getCategoryName(recipe.category)
-                }}
+                recipe={recipe}
                 showFavoriteButton={true}
                 showShoppingListButton={true}
                 compact={false}
@@ -161,11 +245,18 @@ const breadcrumbs = [
             </div>
           ))}
         </div>
+
+        <div id="recipes-empty" class="hidden text-center py-12">
+          <div class="max-w-xl mx-auto">
+            <p class="text-lg font-medium text-mv-forest mb-2">Aucune recette ne correspond à ces filtres.</p>
+            <p class="text-sm text-mv-forest-70">Essayez d'élargir votre recherche ou de réinitialiser les filtres.</p>
+          </div>
+        </div>
       ) : (
         <!-- Recipes Coming Soon -->
         <div class="text-center py-16 scroll-fade-in">
           <div class="max-w-2xl mx-auto">
-            <svg class="mx-auto h-24 w-24 text-mv-forest-doux mb-8" fill="currentColor" viewBox="0 0 24 24">
+            <svg class="mx-auto h-24 w-24 text-mv-forest-80 mb-8" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
             <h2 class="text-3xl font-serif font-bold text-mv-forest mb-4">
@@ -174,7 +265,7 @@ const breadcrumbs = [
             <p class="text-lg text-mv-forest-80 mb-8">
               Je prépare une collection de recettes saines et délicieuses pour vous accompagner dans votre voyage culinaire.
             </p>
-            <div class="bg-mv-cream rounded-lg p-6 inline-block">
+          <div class="bg-mv-cream rounded-lg p-6 inline-block border border-mv-leaf-20">
               <p class="text-mv-forest-80">
                 <strong>Prochainement :</strong> Recettes connectées au CMS pour une expérience interactive
               </p>
@@ -185,7 +276,7 @@ const breadcrumbs = [
         <!-- Recipe Preview Cards -->
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
           <!-- Recipe Card 1 -->
-          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-mv-leaf-20 hover-lift click-feedback">
+          <div class="mv-card overflow-hidden hover-lift click-feedback">
             <div class="aspect-video bg-mv-cream flex items-center justify-center">
               <div class="text-center text-mv-forest-60">
                 <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
@@ -201,22 +292,22 @@ const breadcrumbs = [
               <p class="text-mv-forest-80 mb-4">
                 Une salade fraîche et légère, parfaite pour les journées ensoleillées.
               </p>
-              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
                 <span>⏱️ 15 min</span>
                 <span>👥 4 pers.</span>
                 <span>📊 Facile</span>
               </div>
               <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-mv-forest-doux text-white text-xs rounded-full">Végétarien</span>
-                <span class="px-2 py-1 bg-bois-clair text-gray-800 text-xs rounded-full">Rapide</span>
+                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-cream text-mv-forest text-xs rounded-full">Rapide</span>
               </div>
             </div>
           </div>
 
           <!-- Recipe Card 2 -->
-          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover-lift click-feedback">
+          <div class="mv-card overflow-hidden hover-lift click-feedback">
             <div class="aspect-video bg-gray-200 flex items-center justify-center">
-              <div class="text-center text-gray-500">
+              <div class="text-center text-mv-forest-60">
                 <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                 </svg>
@@ -227,25 +318,25 @@ const breadcrumbs = [
               <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
                 Soupe de légumes d'automne
               </h3>
-              <p class="text-gray-600 mb-4">
+              <p class="text-mv-forest-70 mb-4">
                 Un velouté réconfortant aux saveurs d'automne, riche en nutriments.
               </p>
-              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
                 <span>⏱️ 45 min</span>
                 <span>👥 6 pers.</span>
                 <span>📊 Moyen</span>
               </div>
               <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-mv-forest-doux text-white text-xs rounded-full">Végétarien</span>
-                <span class="px-2 py-1 bg-naturel text-white text-xs rounded-full">Thermomix</span>
+                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-leaf text-white text-xs rounded-full">Thermomix</span>
               </div>
             </div>
           </div>
 
           <!-- Recipe Card 3 -->
-          <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover-lift click-feedback">
+          <div class="mv-card overflow-hidden hover-lift click-feedback">
             <div class="aspect-video bg-gray-200 flex items-center justify-center">
-              <div class="text-center text-gray-500">
+              <div class="text-center text-mv-forest-60">
                 <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                 </svg>
@@ -256,18 +347,18 @@ const breadcrumbs = [
               <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
                 Quinoa aux légumes grillés
               </h3>
-              <p class="text-gray-600 mb-4">
+              <p class="text-mv-forest-70 mb-4">
                 Un plat complet et équilibré, source de protéines végétales.
               </p>
-              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
                 <span>⏱️ 30 min</span>
                 <span>👥 4 pers.</span>
                 <span>📊 Facile</span>
               </div>
               <div class="flex flex-wrap gap-2">
-                <span class="px-2 py-1 bg-mv-forest-doux text-white text-xs rounded-full">Végétarien</span>
-                <span class="px-2 py-1 bg-bois-clair text-gray-800 text-xs rounded-full">Rapide</span>
-                <span class="px-2 py-1 bg-naturel text-white text-xs rounded-full">Saison</span>
+                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-cream text-mv-forest text-xs rounded-full">Rapide</span>
+                <span class="px-2 py-1 bg-mv-leaf text-white text-xs rounded-full">Saison</span>
               </div>
             </div>
           </div>
@@ -275,4 +366,8 @@ const breadcrumbs = [
       )}
     </div>
   </section>
+
+  <script define:vars={{ recipesIndex }}>
+    window.recipeIndex = recipesIndex;
+  </script>
 </MainLayout>

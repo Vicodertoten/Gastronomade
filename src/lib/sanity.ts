@@ -38,6 +38,7 @@ export interface ThermomixData {
   monthlyText: string
   videoUrl: string
   featuredImage: any
+  featuredImageUrl?: string
   demoRecipes: Array<{
     title: string
     description: string
@@ -56,6 +57,16 @@ export interface LocationData {
   description: string
   maxCapacity: number
   image: any
+  imageUrl?: string
+}
+
+export interface CompanyAgendaSlot {
+  date?: string
+  startTime?: string
+  endTime?: string
+  title?: string
+  status?: string
+  notes?: string
 }
 
 export interface RecipeData {
@@ -63,20 +74,45 @@ export interface RecipeData {
   title: string
   slug: { current: string }
   category: string
-  description: string
+  subtitle?: string
+  description?: string
   featuredImage: any
   featuredImageUrl?: string
-  prepTime: number
-  cookTime: number
-  servings: number
-  difficulty: string
-  ingredients: Array<{
+  gallery?: Array<{ url?: string }>
+  prepTime?: number
+  cookTime?: number
+  restTime?: number
+  servings?: number
+  difficulty?: string
+  budget?: string
+  ingredients?: Array<{
+    group?: string
     name: string
     quantity: string
     unit: string
+    notes?: string
   }>
-  instructions: any[]
-  tags: string[]
+  instructions?: any[]
+  highlights?: Array<{
+    title?: string
+    text?: string
+    icon?: string
+  }>
+  tips?: string[]
+  variations?: string[]
+  tags?: string[]
+  diet?: string[]
+  season?: string[]
+  equipment?: string[]
+  allergens?: string[]
+  storage?: string
+  nutrition?: {
+    calories?: number
+    protein?: number
+    carbs?: number
+    fat?: number
+    fiber?: number
+  }
   isPremium: boolean
   publishedAt: string
   rating?: number
@@ -109,6 +145,11 @@ export interface HomeData {
   heroTitle: string
   heroSubtitle: string
   heroDescription: string
+  heroBackgroundImage?: {
+    asset?: {
+      url?: string
+    }
+  }
   locationSectionTitle: string
   locationSectionDescription: string
   restaurantSectionTitle: string
@@ -117,6 +158,16 @@ export interface HomeData {
   ctaDescription: string
   ctaPrimaryButton: string
   ctaSecondaryButton: string
+}
+
+export interface CompanyAgendaData {
+  _id: string
+  title: string
+  description: string
+  slots: CompanyAgendaSlot[]
+  calendarTitle?: string
+  startMonth?: string
+  monthsToShow?: number
 }
 
 export interface ContactData {
@@ -184,22 +235,52 @@ export const queries = {
     "imageUrl": image.asset->url
   }`,
 
+  companyAgenda: `*[_type == "companyAgenda"] | order(_updatedAt desc)[0] {
+    _id,
+    title,
+    description,
+    calendarTitle,
+    startMonth,
+    monthsToShow,
+    slots[]{
+      date,
+      startTime,
+      endTime,
+      title,
+      status,
+      notes
+    }
+  }`,
+
   // Recettes - Toutes les recettes publiques
   recipes: `*[_type == "recipe" && isPremium == false] | order(publishedAt desc) {
     _id,
     title,
     slug,
     category,
+    subtitle,
     description,
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
+    gallery[]{ ..., "url": asset->url },
     prepTime,
     cookTime,
+    restTime,
     servings,
     difficulty,
+    budget,
     ingredients,
     instructions,
+    highlights,
+    tips,
+    variations,
     tags,
+    diet,
+    season,
+    equipment,
+    allergens,
+    storage,
+    nutrition,
     isPremium,
     publishedAt,
     rating,
@@ -213,16 +294,29 @@ export const queries = {
     title,
     slug,
     category,
+    subtitle,
     description,
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
+    gallery[]{ ..., "url": asset->url },
     prepTime,
     cookTime,
+    restTime,
     servings,
     difficulty,
+    budget,
     ingredients,
     instructions,
+    highlights,
+    tips,
+    variations,
     tags,
+    diet,
+    season,
+    equipment,
+    allergens,
+    storage,
+    nutrition,
     isPremium,
     publishedAt,
     rating,
@@ -239,8 +333,13 @@ export const queries = {
     featuredImage,
     "featuredImageUrl": featuredImage.asset->url,
     prepTime,
+    cookTime,
+    restTime,
     difficulty,
-    tags
+    tags,
+    diet,
+    season,
+    budget
   }`,
 
   // About - Informations personnelles
@@ -279,6 +378,11 @@ export const queries = {
     heroTitle,
     heroSubtitle,
     heroDescription,
+    heroBackgroundImage {
+      asset-> {
+        url
+      }
+    },
     locationSectionTitle,
     locationSectionDescription,
     restaurantSectionTitle,

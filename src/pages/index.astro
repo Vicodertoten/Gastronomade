@@ -1,222 +1,610 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import PricingCard from '../components/PricingCard.astro';
-import { sanityClient, queries, type LocationData, type RestaurantData, type HomeData } from '../lib/sanity';
+import {
+  sanityClient,
+  queries,
+  type CompanyAgendaData,
+  type CompanyAgendaSlot,
+  type HomeData,
+  type LocationData,
+  type RestaurantData
+} from '../lib/sanity';
+
+const fallbackAgendaSlots: CompanyAgendaSlot[] = [
+  {
+    date: '2026-02-19',
+    startTime: '09:00',
+    endTime: '12:00',
+    title: 'Atelier stratégie & cuisine',
+    status: 'Disponible',
+    notes: '3 créneaux restants pour les teams building de fin d’hiver'
+  },
+  {
+    date: '2026-03-04',
+    startTime: '14:00',
+    endTime: '17:00',
+    title: 'Séance de dégustation & rencontres',
+    status: 'Disponible',
+    notes: 'Créneau modulable pour réunions clients ou partenaires'
+  },
+  {
+    date: '2026-03-18',
+    startTime: '09:00',
+    endTime: '12:30',
+    title: 'Matinée inspirante pour comités de direction',
+    status: 'Réservé',
+    notes: 'Places confirmées par la société Cygne Energies'
+  }
+];
 
 // Récupérer les données depuis Sanity
 const locations = await sanityClient.fetch<LocationData[]>(queries.locations);
 const restaurantData = await sanityClient.fetch<RestaurantData>(queries.restaurant);
 const homeData = await sanityClient.fetch<HomeData>(queries.home);
+const companyAgenda = await sanityClient.fetch<CompanyAgendaData>(queries.companyAgenda);
 
 // Organiser les locations par type
 const societeLocations = locations.filter(loc => loc.type === 'societe');
 const priveLocations = locations.filter(loc => loc.type === 'prive');
+
+const fallbackSocieteFeatures = [
+  "Cadre inspirant et chaleureux",
+  "Cuisine entièrement équipée",
+  "Parking privé",
+  "Accès facile via E411",
+  "Espace modulable selon vos besoins",
+  "Calendrier de disponibilité"
+];
+
+const fallbackPriveFeatures = [
+  "Anniversaires et célébrations",
+  "Réunions de famille",
+  "Dîners entre amis",
+  "Espace privatif et cosy",
+  "Service personnalisé"
+];
+
+const fallbackRestaurantFeatures = [
+  "Menu unique du chef",
+  "Réservation minimum 4 personnes",
+  "Acompte de 25€ par personne",
+  "Ambiance conviviale",
+  "Produits frais et locaux"
+];
+
+const societeFeatures = societeLocations[0]?.features?.length ? societeLocations[0].features : fallbackSocieteFeatures;
+const priveFeatures = priveLocations[0]?.features?.length ? priveLocations[0].features : fallbackPriveFeatures;
+
+const agendaSlots = (companyAgenda?.slots && companyAgenda.slots.length > 0 ? companyAgenda.slots : fallbackAgendaSlots)
+  .slice()
+  .sort((a, b) => {
+    const aDate = a?.date ? new Date(a.date).getTime() : Infinity;
+    const bDate = b?.date ? new Date(b.date).getTime() : Infinity;
+    return aDate - bDate;
+  });
+
+const statusPalette: Record<string, {background: string; text: string; dot: string}> = {
+  disponible: {
+    background: 'bg-mv-forest border border-mv-forest',
+    text: 'text-mv-cream',
+    dot: 'bg-mv-forest'
+  },
+  'réservé': {
+    background: 'bg-mv-plum border border-mv-plum',
+    text: 'text-mv-cream',
+    dot: 'bg-mv-plum'
+  },
+  libre: {
+    background: 'bg-white border border-mv-forest',
+    text: 'text-mv-forest',
+    dot: 'border border-mv-forest bg-white'
+  }
+}
+
+const normalizeStatusKey = (status?: string) => {
+  const normalized = (status ?? 'disponible').trim().toLowerCase()
+    .replace(/[éèê]/g, 'e')
+    .replace(/[àâ]/g, 'a')
+  if (normalized.includes('reserv')) return 'réservé'
+  if (normalized.includes('libre')) return 'libre'
+  return 'disponible'
+}
+
+const getStatusTheme = (status?: string) => statusPalette[normalizeStatusKey(status)] ?? statusPalette.disponible
+const getStatusBackground = (status?: string) => {
+  const theme = getStatusTheme(status)
+  return `${theme.background} ${theme.text}`
+}
+
+const getStatusDotClass = (status?: string) => getStatusTheme(status).dot
+
+const normalizeSlotDateKey = (value?: string) => {
+  if (!value) return '';
+  const trimmed = value.split('T')[0];
+  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  const year = parsed.getUTCFullYear();
+  const month = String(parsed.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const slotsByDate: Record<string, CompanyAgendaSlot[]> = {};
+agendaSlots.forEach(slot => {
+  const key = normalizeSlotDateKey(slot?.date);
+  if (!key) return;
+  if (!slotsByDate[key]) {
+    slotsByDate[key] = [];
+  }
+  slotsByDate[key].push(slot);
+});
+
+const debugDateKeys = Object.keys(slotsByDate);
+
+const getBaseCalendarDate = (slots: CompanyAgendaSlot[]) => {
+  for (const slot of slots) {
+    if (!slot?.date) continue;
+    const parsed = new Date(slot.date);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  return new Date();
+};
+
+const calendarBaseDate = getBaseCalendarDate(agendaSlots);
+const calendarWeekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const calendarLegendStates = [
+  { label: 'Disponible', status: 'Disponible' },
+  { label: 'Réservé', status: 'Réservé' },
+  { label: 'Libre', status: 'Libre' }
+];
+
+const determineCellStatusLabel = (slots: CompanyAgendaSlot[]) => {
+  if (!slots || slots.length === 0) return 'Libre';
+  const normalized = slots
+    .map(slot => (slot.status ?? 'Disponible').toLowerCase())
+    .map(status => status.replace(/[éèê]/g, 'e'));
+  if (normalized.some(status => status.includes('reserv'))) return 'Réservé';
+  if (normalized.some(status => status.includes('demande'))) return 'Sur demande';
+  return 'Disponible';
+};
+
+const buildCalendarCells = (
+  year: number,
+  month: number,
+  dates: Record<string, CompanyAgendaSlot[]>
+) => {
+  const firstOfMonth = new Date(year, month, 1);
+  const firstWeekday = ((firstOfMonth.getDay() + 6) % 7);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const totalCells = firstWeekday + daysInMonth;
+  const rows = Math.ceil(totalCells / 7);
+  const cells = [];
+
+  for (let index = 0; index < rows * 7; index += 1) {
+    const dayIndex = index - firstWeekday + 1;
+    const isCurrentMonth = index >= firstWeekday && dayIndex <= daysInMonth;
+    const day = isCurrentMonth ? dayIndex : undefined;
+    const dateKey = isCurrentMonth ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayIndex).padStart(2, '0')}` : undefined;
+    const slots = dateKey ? dates[dateKey] ?? [] : [];
+    const status = determineCellStatusLabel(slots);
+
+    cells.push({
+      day,
+      dateKey,
+      slots,
+      isCurrentMonth,
+      status
+    });
+  }
+
+  return cells;
+};
+
+const monthsToShow = Math.max(1, Math.min(4, companyAgenda?.monthsToShow ?? 2));
+const startMonthCandidate = companyAgenda?.startMonth ? new Date(companyAgenda.startMonth) : calendarBaseDate;
+const normalizedStartMonthCandidate = Number.isNaN(startMonthCandidate.getTime())
+  ? new Date(calendarBaseDate.getFullYear(), calendarBaseDate.getMonth(), 1)
+  : new Date(startMonthCandidate.getFullYear(), startMonthCandidate.getMonth(), 1);
+const hasSlotInStartMonth = debugDateKeys.some(dateKey => dateKey.startsWith(
+  `${normalizedStartMonthCandidate.getFullYear()}-${String(normalizedStartMonthCandidate.getMonth() + 1).padStart(2, '0')}`
+));
+const normalizedStartMonth = hasSlotInStartMonth
+  ? normalizedStartMonthCandidate
+  : new Date(calendarBaseDate.getFullYear(), calendarBaseDate.getMonth(), 1);
+
+const calendarMonths = Array.from({ length: monthsToShow }, (_, monthIndex) => {
+  const monthDate = new Date(normalizedStartMonth.getFullYear(), normalizedStartMonth.getMonth() + monthIndex, 1);
+  return {
+    label: monthDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+    year: monthDate.getFullYear(),
+    month: monthDate.getMonth()
+  };
+});
+
+const monthlyCalendars = calendarMonths.map(calendar => ({
+  ...calendar,
+  cells: buildCalendarCells(calendar.year, calendar.month, slotsByDate)
+}));
+
+const fallbackRestaurantDates = [
+  '2026-03-05',
+  '2026-03-19',
+  '2026-04-09',
+  '2026-04-23',
+  '2026-05-07',
+  '2026-05-21'
+];
+
+const formatRestaurantDay = (value?: string) => {
+  if (!value) return ''
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ''
+  return parsed.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+const restaurantStatus = restaurantData?.isFull ? 'Réservé' : 'Disponible'
+const restaurantFeatures = [
+  restaurantData?.menuDescription || fallbackRestaurantFeatures[0],
+  `Réservation minimum ${restaurantData?.minGuests || 4} personnes`,
+  `Acompte de ${restaurantData?.depositAmount || 25}€ par personne`,
+  fallbackRestaurantFeatures[3],
+  fallbackRestaurantFeatures[4]
+]
+const restaurantSlots = (restaurantData?.dates && restaurantData.dates.length > 0 ? restaurantData.dates : fallbackRestaurantDates)
+  .slice(0, 8)
+  .map(date => ({
+    date,
+    day: date ? new Date(date).getDate() : '',
+    label: formatRestaurantDay(date),
+    status: restaurantStatus
+  }))
+
+const heroBackgroundUrl = homeData?.heroBackgroundImage?.asset?.url
+const mergedLocationFeatures = Array.from(
+  new Set([...(societeFeatures || []), ...(priveFeatures || []), ...(restaurantFeatures || [])].filter(Boolean))
+).slice(0, 4)
 ---
 
 <MainLayout title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}>
   <!-- Hero Section -->
-  <section class="bg-mv-cream py-12 sm:py-16 lg:py-20 fade-in-up" role="banner">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-mv-forest mb-3 sm:mb-4 leading-tight">
-        {homeData?.heroTitle || "Gastronomade"}
-      </h1>
-      <p class="text-lg sm:text-xl md:text-2xl text-mv-plum mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed">
-        {homeData?.heroSubtitle || "Découvrez l'art de manger vrai avec Muriel Cruysmans à Wavre"}
-      </p>
-      <p class="text-base sm:text-lg text-mv-forest-90 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
-        {homeData?.heroDescription || "Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands"}
-      </p>
-      <div class="mt-6 sm:mt-8">
-        <a href="#restaurant-section" class="inline-block bg-mv-leaf text-mv-cream px-6 sm:px-8 py-3 sm:py-4 mv-pill font-semibold text-sm sm:text-base hover:bg-mv-forest transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2" role="button">
-          Découvrir nos services
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Gastronomade Section -->
-  <section class="py-12 sm:py-16 lg:py-20 bg-mv-leaf fade-in-up" id="restaurant-section" role="main">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-6 sm:mb-8 lg:mb-10">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-3 leading-tight">
-          {homeData?.locationSectionTitle || 'Location de l\'Espace "La Zboum"'}
-        </h2>
-        <p class="text-base sm:text-lg text-mv-cream-90 max-w-2xl mx-auto leading-relaxed">
-          {homeData?.locationSectionDescription || "Un cadre inspirant pour vos réunions d'entreprise, événements privés et soirées gourmandes"}
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
-        <!-- Sociétés -->
-        {societeLocations.length > 0 ? (
-          <PricingCard
-            title={societeLocations[0].title}
-            subtitle={societeLocations[0].subtitle || "Réunions & Team-Buildings"}
-            price={societeLocations[0].price}
-            period="HTVA"
-            features={societeLocations[0].features}
-            ctaText="Réserver pour mon équipe"
-            ctaLink="/contact"
-          />
-        ) : (
-          <PricingCard
-            title="Sociétés"
-            subtitle="Réunions & Team-Buildings"
-            price="400€"
-            period="HTVA"
-            features={[
-              "Cadre inspirant et chaleureux",
-              "Cuisine entièrement équipée",
-              "Parking privé",
-              "Accès facile via E411",
-              "Espace modulable selon vos besoins",
-              "Calendrier de disponibilité"
-            ]}
-            ctaText="Réserver pour mon équipe"
-            ctaLink="/contact"
-          />
-        )}
-
-        <!-- Privé -->
-        {priveLocations.length > 0 ? (
-          <PricingCard
-            title={priveLocations[0].title}
-            subtitle={priveLocations[0].subtitle || "Événements personnels"}
-            price={priveLocations[0].price}
-            period="HTVA"
-            features={priveLocations[0].features}
-            ctaText="Organiser mon événement"
-            ctaLink="/contact"
-          />
-        ) : (
-          <PricingCard
-            title="Privé"
-            subtitle="Événements personnels"
-            price="400€"
-            period="HTVA"
-            features={[
-              "Anniversaires et célébrations",
-              "Réunions de famille",
-              "Dîners entre amis",
-              "Espace privatif et cosy",
-              "Service personnalisé"
-            ]}
-            ctaText="Organiser mon événement"
-            ctaLink="/contact"
-          />
-        )}
-
-        <!-- Restaurant -->
-        <PricingCard
-          title="Restaurant"
-          subtitle={restaurantData?.subtitle || "Un jeudi soir par mois"}
-          price={restaurantData?.price ? `${restaurantData.price}€` : "50€"}
-          period="/pers."
-          features={[
-            restaurantData?.menuDescription || "Menu unique du chef",
-            `Réservation minimum ${restaurantData?.minGuests || 4} personnes`,
-            `Acompte de ${restaurantData?.depositAmount || 25}€ par personne`,
-            "Ambiance conviviale",
-            "Produits frais et locaux"
-          ]}
-          ctaText="Réserver une table"
-          ctaLink="#restaurant-section"
-          highlight="true"
+  <section class="relative overflow-hidden bg-gradient-to-b from-mv-cream via-white to-mv-cream/70 mv-section fade-in-up" role="banner">
+    {heroBackgroundUrl && (
+      <div class="pointer-events-none absolute inset-0 hidden lg:block">
+        <div
+          class="absolute inset-y-0 right-0 w-2/3 bg-cover bg-center"
+          style={`background-image: url(${heroBackgroundUrl}?w=1800&auto=format);`}
+          aria-hidden="true"
+        />
+        <div
+          class="absolute inset-y-0 right-0 w-2/3 bg-[linear-gradient(to_left,transparent_0%,transparent_33%,rgba(255,255,255,0.6)_52%,rgba(255,255,255,0.92)_72%,white_100%),linear-gradient(to_bottom,rgba(251,248,241,0)_80%,rgba(251,248,241,1)_100%)]"
+          aria-hidden="true"
         />
       </div>
-    </div>
-  </section>
-
-  <!-- Restaurant Section -->
-  <section id="restaurant-section" class="py-16 bg-mv-cream">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-forest mb-3">
-          {homeData?.restaurantSectionTitle || 'Restaurant Gastronomade'}
-        </h2>
-        <p class="text-lg text-mv-plum max-w-2xl mx-auto">
-          {homeData?.restaurantSectionDescription || "Découvrez notre carte saisonnière et nos événements culinaires"}
-        </p>
-      </div>
-
-      <!-- Restaurant Content -->
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-mv-cream rounded-lg shadow-lg p-8 border border-mv-leaf">
-          <div class="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 class="text-xl font-serif font-bold text-mv-forest mb-4">{restaurantData?.menuTitle || "Menu du Chef"}</h3>
-              <p class="text-mv-forest-90 mb-4">
-                {restaurantData?.menuDescription || "Un menu unique élaboré avec des produits frais et locaux, changeant selon les saisons"}
-              </p>
-              <div class="text-2xl font-bold text-mv-coral">
-                {restaurantData?.price ? `${restaurantData.price}€` : "50€"} <span class="text-lg font-normal text-mv-forest-60">par personne</span>
-              </div>
-              <div class="mt-6">
-                <a href="/contact" class="inline-block bg-mv-leaf text-mv-forest px-6 py-3 rounded-lg font-semibold hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
-                  Réserver maintenant
-                </a>
-              </div>
-            </div>
-            <div>
-              <h3 class="text-xl font-serif font-bold text-mv-forest mb-4">{restaurantData?.datesTitle || "Prochaines Dates"}</h3>
-              <div class="space-y-2">
-                {restaurantData?.dates && restaurantData.dates.length > 0 ? (
-                  restaurantData.dates.slice(0, 4).map((date, index) => (
-                    <div key={index} class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest-90">{date}</span>
-                      <span class="text-mv-leaf font-medium">2026</span>
-                    </div>
-                  ))
-                ) : (
-                  <>
-                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest-90">Jeudi 5 mars</span>
-                      <span class="text-mv-leaf font-medium">2026</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest-90">Jeudi 9 avril</span>
-                      <span class="text-mv-leaf font-medium">2026</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest-90">Jeudi 21 mai</span>
-                      <span class="text-mv-leaf font-medium">2026</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-b border-mv-leaf">
-                      <span class="text-mv-forest-90">Jeudi 11 juin</span>
-                      <span class="text-mv-leaf font-medium">2026</span>
-                    </div>
-                  </>
-                )}
-              </div>
-              <div class="mt-4 text-center">
-                <a href="/contact" class="inline-block bg-mv-leaf text-white px-6 py-2 rounded-lg font-medium hover:bg-mv-forest hover:scale-105 transition-all duration-300 transform shadow-sm hover:shadow-md">
-                  Réserver
-                </a>
-              </div>
-            </div>
+    )}
+    <div class="relative z-10 mv-container">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+          <p class="mv-kicker">Gastronomade</p>
+          <h1 class="mv-hero-title max-w-3xl">
+            {homeData?.heroTitle || "Gastronomade"}
+          </h1>
+          <p class="mv-hero-subtitle max-w-3xl">
+            {homeData?.heroSubtitle || "Découvrez l'art de manger vrai avec Muriel Cruysmans à Wavre"}
+          </p>
+          <p class="mv-lead max-w-2xl text-mv-forest-90">
+            {homeData?.heroDescription || "Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands"}
+          </p>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <a href="/contact" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
+              Réserver un créneau
+            </a>
+            <a href="#location-section" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
+              Découvrir le lieu
+            </a>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Call to Action Section -->
-  <section class="py-16 bg-mv-forest">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl md:text-4xl font-serif font-bold text-mv-cream mb-6">
-        {homeData?.ctaTitle || "Prêt à vivre une expérience gastronomique unique ?"}
-      </h2>
-      <p class="text-xl text-mv-cream-90 mb-8">
-        {homeData?.ctaDescription || "Contactez Muriel pour réserver votre espace ou découvrir ses services"}
-      </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/contact" class="bg-mv-leaf text-white px-8 py-4 rounded-lg font-semibold hover:bg-mv-coral hover:scale-105 transition-all duration-300 transform shadow-md hover:shadow-lg">
-          {homeData?.ctaPrimaryButton || "Me contacter"}
-        </a>
-        <a href="/about" class="border-2 border-mv-cream text-mv-cream px-8 py-4 rounded-lg font-semibold hover:bg-mv-cream hover:text-mv-forest hover:scale-105 transition-all duration-300 transform">
-          {homeData?.ctaSecondaryButton || "En savoir plus"}
-        </a>
+  <!-- Gastronomade Section -->
+  <section class="mv-section bg-white fade-in-up scroll-fade-in" id="location-section">
+    <div class="mv-container">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <div class="lg:col-span-5 space-y-4">
+          <p class="mv-kicker">Lieu & événements</p>
+          <h2 class="mv-section-title">
+            {homeData?.locationSectionTitle || 'Location de l\'Espace "La Zboum"'}
+          </h2>
+          <p class="mv-lead text-mv-forest-80">
+            {homeData?.locationSectionDescription || "Un cadre inspirant pour vos réunions d'entreprise, événements privés et soirées gourmandes"}
+          </p>
+          <a href="/contact" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
+            Demander les disponibilités
+          </a>
+        </div>
+        <div class="lg:col-span-7">
+          <div class="rounded-3xl border border-mv-leaf-20 bg-mv-cream-80 p-6">
+            <p class="text-xs uppercase tracking-[0.25em] text-mv-forest-60 mb-4">Inclus dans toutes les options</p>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-mv-forest-80">
+              {mergedLocationFeatures.map((feature) => (
+                <li class="flex items-start gap-2">
+                  <span class="mt-1 h-1.5 w-1.5 rounded-full bg-mv-leaf" aria-hidden="true"></span>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <p class="mt-3 text-xs text-mv-forest-60">Et plus encore selon l’option choisie.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative mt-10">
+        <div class="pointer-events-none absolute -top-10 left-10 h-24 w-24 rounded-full bg-mv-leaf-10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-10 right-6 h-28 w-28 rounded-full bg-mv-coral-20 blur-3xl"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+          <!-- Sociétés -->
+          <div class="scroll-slide-in-left">
+            {societeLocations.length > 0 ? (
+              <PricingCard
+                title={societeLocations[0].title}
+                subtitle={societeLocations[0].subtitle || "Réunions & Team-Buildings"}
+                price={societeLocations[0].price}
+                period="HTVA"
+                features={[]}
+                imageUrl={societeLocations[0].imageUrl ? `${societeLocations[0].imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
+                imageAlt={societeLocations[0].title}
+                ctaText="Réserver pour mon équipe"
+                ctaLink="/contact"
+              />
+            ) : (
+              <PricingCard
+                title="Sociétés"
+                subtitle="Réunions & Team-Buildings"
+                price="400€"
+                period="HTVA"
+                features={[]}
+                ctaText="Réserver pour mon équipe"
+                ctaLink="/contact"
+              />
+            )}
+          </div>
+
+          <!-- Privé -->
+          <div class="scroll-fade-in">
+            {priveLocations.length > 0 ? (
+              <PricingCard
+                title={priveLocations[0].title}
+                subtitle={priveLocations[0].subtitle || "Événements personnels"}
+                price={priveLocations[0].price}
+                period="HTVA"
+                features={[]}
+                imageUrl={priveLocations[0].imageUrl ? `${priveLocations[0].imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
+                imageAlt={priveLocations[0].title}
+                ctaText="Organiser mon événement"
+                ctaLink="#entreprise-agenda"
+              />
+            ) : (
+              <PricingCard
+                title="Privé"
+                subtitle="Événements personnels"
+                price="400€"
+                period="HTVA"
+                features={[]}
+                ctaText="Organiser mon événement"
+                ctaLink="#entreprise-agenda"
+              />
+            )}
+          </div>
+
+          <!-- Restaurant -->
+          <div class="scroll-slide-in-right">
+            <PricingCard
+              title="Restaurant"
+              subtitle={restaurantData?.subtitle || "Un jeudi soir par mois"}
+              price={restaurantData?.price ? `${restaurantData.price}€` : "50€"}
+              period="/pers."
+              features={[]}
+              ctaText="Réserver une table"
+              ctaLink="#restaurant-section"
+              highlight="true"
+            />
+          </div>
+        </div>
       </div>
     </div>
+  </section>
+
+  <!-- Restaurant Section -->
+  <section id="restaurant-section" class="mv-section bg-gradient-to-b from-mv-cream to-white scroll-fade-in">
+    <div class="mv-container">
+      <div class="text-center mb-8">
+        <h2 class="mv-section-title mb-3">
+          {homeData?.restaurantSectionTitle || 'Restaurant Gastronomade'}
+        </h2>
+        <p class="mv-lead text-mv-plum max-w-2xl mx-auto">
+          {homeData?.restaurantSectionDescription || "Découvrez notre carte saisonnière et nos événements culinaires"}
+        </p>
+      </div>
+
+      <div class="max-w-5xl mx-auto">
+        <div class="bg-white rounded-3xl border border-mv-leaf-20 p-8 shadow-xl">
+          <div class="grid gap-8 lg:grid-cols-[1.2fr,0.8fr]">
+            <div>
+              <h3 class="text-2xl font-serif font-bold text-mv-forest mb-4">
+                {restaurantData?.menuTitle || 'Menu du Chef'}
+              </h3>
+              <p class="text-mv-forest-80 mb-4">
+                {restaurantData?.menuDescription || 'Un menu unique, imaginé pour des soirées conviviales autour de produits de saison.'}
+              </p>
+              <div class="space-y-3 text-sm text-mv-forest-90">
+                <p class="font-semibold text-mv-forest">
+                  {restaurantData?.price ? `${restaurantData.price}€/personne` : '50€/personne'}
+                </p>
+                <p>{`Réservation minimum ${restaurantData?.minGuests || 4} personnes`}</p>
+                <p>{`Acompte de ${restaurantData?.depositAmount || 25}€ par personne`}</p>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div class="text-center text-xs font-semibold uppercase tracking-[0.32em] text-mv-forest-60">
+                {restaurantData?.reservationTitle || 'Prochaines soirées'}
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                {restaurantSlots.map((slot, index) => (
+                  <article
+                    key={`${slot.date ?? 'fallback'}-${index}`}
+                    class="rounded-2xl border border-mv-leaf-20 bg-mv-cream-80 p-3 text-center"
+                  >
+                    <span class="text-2xl leading-none text-mv-forest">{slot.day || '?'}</span>
+                    <span class="mt-1 block text-[0.65rem] text-mv-forest-70 leading-tight">{slot.label || 'Date à confirmer'}</span>
+                    <span class={`mt-2 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-[0.2em] ${getStatusBackground(slot.status)}`}>
+                      {restaurantStatus === 'Réservé' ? 'Complet' : 'Disponible'}
+                    </span>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-center">
+            <a
+              href="/contact"
+              class="mv-btn mv-btn-primary bg-mv-forest text-white text-[0.85rem] uppercase tracking-[0.3em] shadow-lg hover:bg-mv-plum transition"
+            >
+              Réserver un créneau
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agenda Entreprises Section -->
+  <section id="entreprise-agenda" class="mv-section-tight bg-mv-cream" aria-labelledby="entreprise-agenda-title">
+    <div class="mv-container max-w-5xl">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between" id="entreprise-agenda-title">
+        <div class="max-w-2xl">
+          <p class="mv-kicker mb-1">Entreprises</p>
+          <h2 class="mv-section-title">
+            {companyAgenda?.calendarTitle || "Disponibilités entreprises"}
+          </h2>
+        </div>
+        <div class="flex flex-col items-start gap-2">
+          <a
+            href="/contact"
+            class="mv-btn mv-btn-secondary border-mv-forest bg-white px-4 py-1 text-xs text-mv-forest transition hover:bg-mv-forest/5"
+          >
+            Réserver un créneau
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-4">
+        <div class="flex items-center justify-between gap-4">
+          <span id="enterprise-calendar-current" class="text-[0.75rem] font-semibold uppercase tracking-[0.3em] text-mv-forest-60">
+            {monthlyCalendars.length ? monthlyCalendars[0].label : ''}
+          </span>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              id="enterprise-calendar-prev"
+              class="rounded-full border border-mv-forest/40 px-3 py-1 text-[0.55rem] font-semibold uppercase tracking-[0.3em] text-mv-forest transition hover:bg-mv-forest/5"
+            >
+              Préc.
+            </button>
+            <button
+              type="button"
+              id="enterprise-calendar-next"
+              class="rounded-full border border-mv-forest/40 px-3 py-1 text-[0.55rem] font-semibold uppercase tracking-[0.3em] text-mv-forest transition hover:bg-mv-forest/5"
+            >
+              Suiv.
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 text-[0.55rem] font-semibold uppercase tracking-[0.3em] text-mv-forest-50">
+          {calendarLegendStates.map(state => (
+            <span key={state.label} class="flex items-center gap-1">
+              <span
+                class={`inline-flex h-2 w-2 rounded-full ${getStatusDotClass(state.status)}`}
+                aria-hidden="true"
+              ></span>
+              {state.label}
+            </span>
+          ))}
+        </div>
+
+        <div class="relative">
+          {monthlyCalendars.map((month, index) => (
+            <div
+              key={month.label}
+              data-calendar-month-index={index}
+              data-calendar-label={month.label}
+              class={`space-y-2 rounded-2xl border border-mv-leaf-20 bg-white p-4 shadow-lg transition ${
+                index === 0 ? '' : 'hidden'
+              }`}
+            >
+              <div class="grid grid-cols-7 gap-[1px] text-[0.5rem] font-semibold uppercase tracking-[0.25em] text-mv-forest-60">
+                {calendarWeekDays.map(day => (
+                  <span key={`${month.label}-${day}`}>{day}</span>
+                ))}
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-[0.6rem]">
+                {month.cells.map((cell, cellIndex) => (
+                  <div
+                    key={`${month.label}-${cell.dateKey ?? 'empty'}-${cellIndex}`}
+                    class={`flex h-10 items-center justify-center rounded-lg text-xs font-semibold transition ${
+                      cell.isCurrentMonth
+                        ? `${getStatusBackground(cell.status)} shadow-mv-forest-5`
+                        : 'bg-mv-cream-80 border border-mv-leaf-20 text-mv-forest-50'
+                    }`}
+                  >
+                    {cell.day ?? ''}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      (() => {
+        const months = Array.from(document.querySelectorAll('[data-calendar-month-index]'))
+        if (!months.length) return
+        const prev = document.getElementById('enterprise-calendar-prev')
+        const next = document.getElementById('enterprise-calendar-next')
+        const label = document.getElementById('enterprise-calendar-current')
+        let currentIndex = 0
+
+        const update = index => {
+          months.forEach((month, idx) => {
+            const isActive = idx === index
+            month.classList.toggle('hidden', !isActive)
+            month.setAttribute('aria-hidden', (!isActive).toString())
+          })
+          if (label) {
+            label.textContent = months[index]?.dataset.calendarLabel ?? ''
+          }
+        }
+
+        prev?.addEventListener('click', () => {
+          currentIndex = (currentIndex - 1 + months.length) % months.length
+          update(currentIndex)
+        })
+
+        next?.addEventListener('click', () => {
+          currentIndex = (currentIndex + 1) % months.length
+          update(currentIndex)
+        })
+        update(0)
+      })()
+    </script>
   </section>
 </MainLayout>

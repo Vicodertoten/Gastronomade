@@ -75,7 +75,7 @@ const canonicalUrl = `https://gastronomade.netlify.app${url}`;
 <body class="bg-mv-cream font-sans text-mv-forest min-h-screen">
   <!-- Navigation -->
   <nav class="bg-mv-cream-80 backdrop-blur-md border-b border-mv-leaf-30 sticky top-0 z-50 shadow-lg shadow-mv-forest-5">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mv-container">
       <div class="flex justify-between items-center h-16">
         <div class="flex-shrink-0">
           <a href="/" class="text-xl md:text-2xl font-serif font-bold text-mv-forest hover:text-mv-leaf transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 rounded">
@@ -133,7 +133,7 @@ const canonicalUrl = `https://gastronomade.netlify.app${url}`;
 
   <!-- Footer -->
   <footer class="bg-mv-cream border-t border-mv-leaf-20 mt-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <div class="mv-container py-8 md:py-12">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <!-- Informations -->
         <div class="space-y-4">
@@ -225,6 +225,29 @@ const canonicalUrl = `https://gastronomade.netlify.app${url}`;
           }
         });
       }
+    });
+
+    // Scroll reveal animations
+    document.addEventListener('DOMContentLoaded', () => {
+      const animated = document.querySelectorAll('.scroll-fade-in, .scroll-slide-in-left, .scroll-slide-in-right');
+      if (!animated.length) return;
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) {
+        animated.forEach((el) => el.classList.add('visible'));
+        return;
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+      animated.forEach((el) => observer.observe(el));
     });
   </script>
 </body>

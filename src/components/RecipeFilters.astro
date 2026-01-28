@@ -1,534 +1,825 @@
 ---
-// RecipeFilters.astro - Filtres améliorés pour les recettes
+// RecipeFilters.astro - Filtres complets pour les recettes
 export interface Props {
   currentFilters?: {
-    category?: string;
-    difficulty?: string;
-    time?: string;
     search?: string;
+    category?: string | string[];
+    difficulty?: string | string[];
+    time?: string | string[];
+    budget?: string | string[];
     tags?: string[];
+    diet?: string[];
+    season?: string[];
+    sort?: string;
   };
-  recipes?: any[];
+  availableTags?: string[];
+  availableDiets?: Array<{ value: string; label: string }>;
+  availableSeasons?: Array<{ value: string; label: string }>;
+  categories?: Array<{ value: string; label: string; count?: number }>;
+  budgets?: Array<{ value: string; label: string }>;
+  totalRecipes: number;
 }
 
-const { currentFilters = {}, recipes = [] } = Astro.props;
+const {
+  currentFilters = {},
+  availableTags = [],
+  availableDiets = [],
+  availableSeasons = [],
+  categories = [],
+  budgets = [],
+  totalRecipes
+} = Astro.props;
 ---
 
-<div class="recipe-filters bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-  <!-- Barre de recherche -->
-  <div class="mb-6">
-    <div class="relative">
-      <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-mv-forest-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <input
-        type="text"
-        id="recipe-search"
-        placeholder="Rechercher une recette..."
-        value={currentFilters.search || ''}
-        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
-      />
-      <button
-        id="clear-search"
-        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-mv-forest-60 hover:text-mv-forest-80 hidden"
-        aria-label="Effacer la recherche"
-      >
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+<div class="recipe-filters mv-card p-6 mb-8">
+  <div class="flex flex-col lg:flex-row gap-4">
+    <div class="flex-1">
+      <label for="recipe-search" class="block text-sm font-medium text-mv-forest mb-2">
+        Rechercher une recette
+      </label>
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-mv-forest-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-      </button>
+        <input
+          type="text"
+          id="recipe-search"
+          value={currentFilters.search || ''}
+          placeholder="Nom, ingrédient, tag..."
+          class="mv-input w-full pl-10 pr-10"
+        />
+        <button
+          id="clear-search"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-mv-forest-60 hover:text-mv-forest hidden"
+          aria-label="Effacer la recherche"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
     </div>
-  </div>
 
-  <!-- Filtres rapides -->
-  <div class="mb-6">
-    <h3 class="font-semibold text-mv-forest mb-3">Filtres rapides</h3>
-    <div class="flex flex-wrap gap-2">
-      <button
-        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
-        data-filter="category"
-        data-value=""
-      >
-        Toutes
-      </button>
-      <button
-        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
-        data-filter="category"
-        data-value="entree"
-      >
-        Entrées
-      </button>
-      <button
-        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
-        data-filter="category"
-        data-value="plat"
-      >
-        Plats principaux
-      </button>
-      <button
-        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
-        data-filter="category"
-        data-value="dessert"
-      >
-        Desserts
-      </button>
-      <button
-        class="filter-quick-btn px-4 py-2 bg-mv-cream text-mv-forest rounded-full text-sm font-medium hover:bg-mv-leaf hover:text-mv-cream transition-all duration-300 hover:scale-105"
-        data-filter="category"
-        data-value="accompagnement"
-      >
-        Accompagnements
-      </button>
-    </div>
-  </div>
-
-  <!-- Filtres avancés -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <!-- Catégorie -->
-    <div>
-      <label for="category-filter" class="block text-sm font-medium text-mv-forest mb-2">
-        Catégorie
+    <div class="w-full lg:w-56">
+      <label for="sort-filter" class="block text-sm font-medium text-mv-forest mb-2">
+        Trier
       </label>
-      <select
-        id="category-filter"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
-      >
-        <option value="">Toutes les catégories</option>
-        <option value="entree">Entrées</option>
-        <option value="plat">Plats principaux</option>
-        <option value="dessert">Desserts</option>
-        <option value="boisson">Boissons</option>
-        <option value="accompagnement">Accompagnements</option>
-      </select>
-    </div>
-
-    <!-- Difficulté -->
-    <div>
-      <label for="difficulty-filter" class="block text-sm font-medium text-mv-forest mb-2">
-        Difficulté
-      </label>
-      <select
-        id="difficulty-filter"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
-      >
-        <option value="">Toutes les difficultés</option>
-        <option value="facile">Facile</option>
-        <option value="moyen">Moyen</option>
-        <option value="difficile">Difficile</option>
-      </select>
-    </div>
-
-    <!-- Temps de préparation -->
-    <div>
-      <label for="time-filter" class="block text-sm font-medium text-mv-forest mb-2">
-        Temps de préparation
-      </label>
-      <select
-        id="time-filter"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mv-leaf focus:border-transparent transition-colors"
-      >
-        <option value="">Tous les temps</option>
-        <option value="15">Moins de 15 min</option>
-        <option value="30">15-30 min</option>
-        <option value="60">30-60 min</option>
-        <option value="120">Plus d'1h</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Tags -->
-  <div class="mt-6">
-    <h3 class="font-semibold text-mv-forest mb-3">Tags</h3>
-    <div id="tags-container" class="grid grid-cols-2 md:grid-cols-3 gap-2">
-      <!-- Tags will be rendered here -->
-    </div>
-  </div>
-
-  <!-- Actions -->
-  <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-    <div class="flex items-center space-x-4">
-      <span id="results-count" class="text-sm text-mv-forest-80">
-        0 recette{0 !== 1 ? 's' : ''} trouvée{0 !== 1 ? 's' : ''}
-      </span>
-      <button
-        id="clear-filters"
-        class="text-sm text-mv-forest hover:text-mv-leaf transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled
-      >
-        Effacer les filtres
-      </button>
-    </div>
-
-    <div class="flex items-center space-x-2">
-      <span class="text-sm text-mv-forest-80">Trier par:</span>
       <select
         id="sort-filter"
-        class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-mv-leaf focus:border-transparent"
+        class="filter-select mv-input w-full py-3"
       >
         <option value="recent">Plus récent</option>
-        <option value="popular">Plus populaire</option>
-        <option value="time">Temps de préparation</option>
+        <option value="popular">Populaire</option>
+        <option value="rating">Mieux noté</option>
+        <option value="time">Temps total</option>
         <option value="difficulty">Difficulté</option>
         <option value="name">Nom (A-Z)</option>
       </select>
     </div>
+
+    <div class="w-full lg:w-48 lg:self-end">
+      <button
+        id="filters-toggle"
+        class="mv-btn w-full border border-mv-leaf-30 text-mv-forest bg-white hover:border-mv-leaf hover:text-mv-leaf transition-colors"
+        type="button"
+        aria-expanded="false"
+      >
+        <span>Filtres</span>
+        <span id="filters-count" class="text-xs bg-mv-cream text-mv-forest px-2 py-0.5 rounded-full">0</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="filters-panel" class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 hidden">
+    <div class="filter-dropdown" data-filter="category">
+      <label class="block text-sm font-medium text-mv-forest mb-2">Catégorie</label>
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+        <span>Choisir</span>
+        <span id="category-count" class="text-xs text-mv-forest-60">Tous</span>
+      </button>
+      <div class="filter-menu hidden">
+        {categories.map((category) => (
+          <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
+            <input
+              type="checkbox"
+              class="filter-checkbox"
+              data-filter="category"
+              value={category.value}
+              data-label={`${category.label}${category.count ? ` (${category.count})` : ''}`}
+              checked={Array.isArray(currentFilters.category) ? currentFilters.category.includes(category.value) : currentFilters.category === category.value}
+            />
+            <span>{category.label}{category.count ? ` (${category.count})` : ''}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="filter-dropdown" data-filter="difficulty">
+      <label class="block text-sm font-medium text-mv-forest mb-2">Difficulté</label>
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+        <span>Choisir</span>
+        <span id="difficulty-count" class="text-xs text-mv-forest-60">Tous</span>
+      </button>
+      <div class="filter-menu hidden">
+        {['facile','moyen','difficile'].map((value) => (
+          <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
+            <input
+              type="checkbox"
+              class="filter-checkbox"
+              data-filter="difficulty"
+              value={value}
+              data-label={value.charAt(0).toUpperCase() + value.slice(1)}
+              checked={Array.isArray(currentFilters.difficulty) ? currentFilters.difficulty.includes(value) : currentFilters.difficulty === value}
+            />
+            <span>{value.charAt(0).toUpperCase() + value.slice(1)}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="filter-dropdown" data-filter="time">
+      <label class="block text-sm font-medium text-mv-forest mb-2">Temps total</label>
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+        <span>Choisir</span>
+        <span id="time-count" class="text-xs text-mv-forest-60">Tous</span>
+      </button>
+      <div class="filter-menu hidden">
+        {[
+          { value: '15', label: 'Moins de 15 min' },
+          { value: '30', label: '15-30 min' },
+          { value: '60', label: '30-60 min' },
+          { value: '120', label: "Plus d'1h" }
+        ].map((item) => (
+          <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
+            <input
+              type="checkbox"
+              class="filter-checkbox"
+              data-filter="time"
+              value={item.value}
+              data-label={item.label}
+              checked={Array.isArray(currentFilters.time) ? currentFilters.time.includes(item.value) : currentFilters.time === item.value}
+            />
+            <span>{item.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="filter-dropdown" data-filter="budget">
+      <label class="block text-sm font-medium text-mv-forest mb-2">Budget</label>
+      <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+        <span>Choisir</span>
+        <span id="budget-count" class="text-xs text-mv-forest-60">Tous</span>
+      </button>
+      <div class="filter-menu hidden">
+        {budgets.map((budget) => (
+          <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
+            <input
+              type="checkbox"
+              class="filter-checkbox"
+              data-filter="budget"
+              value={budget.value}
+              data-label={budget.label}
+              checked={Array.isArray(currentFilters.budget) ? currentFilters.budget.includes(budget.value) : currentFilters.budget === budget.value}
+            />
+            <span>{budget.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div id="filters-advanced" class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 hidden">
+    {availableTags.length > 0 && (
+      <div class="filter-dropdown" data-filter="tags">
+        <label class="block text-sm font-medium text-mv-forest mb-2">Tags</label>
+        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+          <span>Choisir</span>
+          <span id="tags-count" class="text-xs text-mv-forest-60">Tous</span>
+        </button>
+        <div class="filter-menu hidden">
+          {availableTags.map(tag => (
+            <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
+              <input
+                type="checkbox"
+                class="filter-checkbox"
+                data-filter="tags"
+                value={tag}
+                data-label={`#${tag}`}
+                checked={currentFilters.tags?.includes(tag)}
+              />
+              <span>#{tag}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    )}
+    {availableDiets.length > 0 && (
+      <div class="filter-dropdown" data-filter="diet">
+        <label class="block text-sm font-medium text-mv-forest mb-2">Régimes</label>
+        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+          <span>Choisir</span>
+          <span id="diet-count" class="text-xs text-mv-forest-60">Tous</span>
+        </button>
+        <div class="filter-menu hidden">
+          {availableDiets.map(diet => (
+            <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
+              <input
+                type="checkbox"
+                class="filter-checkbox"
+                data-filter="diet"
+                value={diet.value}
+                data-label={diet.label}
+                checked={currentFilters.diet?.includes(diet.value)}
+              />
+              <span>{diet.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {availableSeasons.length > 0 && (
+      <div class="filter-dropdown" data-filter="season">
+        <label class="block text-sm font-medium text-mv-forest mb-2">Saisons</label>
+        <button type="button" class="filter-trigger mv-input w-full flex items-center justify-between">
+          <span>Choisir</span>
+          <span id="season-count" class="text-xs text-mv-forest-60">Tous</span>
+        </button>
+        <div class="filter-menu hidden">
+          {availableSeasons.map(season => (
+            <label class="filter-option flex items-center gap-2 text-sm text-mv-forest">
+              <input
+                type="checkbox"
+                class="filter-checkbox"
+                data-filter="season"
+                value={season.value}
+                data-label={season.label}
+                checked={currentFilters.season?.includes(season.value)}
+              />
+              <span>{season.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+
+  <div class="mt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-t border-mv-leaf-20 pt-4">
+    <div class="text-sm text-mv-forest-80">
+      <span id="results-count">0</span> recette(s) trouvée(s) sur {totalRecipes}
+    </div>
+
+    <div id="active-filters" class="flex flex-wrap gap-2"></div>
+
+    <button
+      id="clear-filters"
+      class="mv-btn mv-btn-secondary bg-mv-cream text-mv-forest hover:bg-mv-leaf-10 transition-colors focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 disabled:opacity-50"
+      disabled
+    >
+      Tout effacer
+    </button>
   </div>
 </div>
 
-<script>
-  class RecipeFilters {
-    constructor() {
-      this.filters = {
-        search: '',
-        category: '',
-        difficulty: '',
-        time: '',
-        sort: 'recent',
-        tags: []
-      };
-      this.recipes = [];
-      this.filteredRecipes = [];      this.availableTags = [];      this.filterTimeout = null;
-      this.init();
+<script define:vars={{ currentFilters }}>
+  const normalizeText = (value = '') =>
+    (value ?? '')
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+
+  const difficultyOrder = { facile: 1, moyen: 2, difficile: 3 };
+
+  const filterState = {
+    search: currentFilters.search || '',
+    category: currentFilters.category ? [currentFilters.category].flat().filter(Boolean) : [],
+    difficulty: currentFilters.difficulty ? [currentFilters.difficulty].flat().filter(Boolean) : [],
+    time: currentFilters.time ? [currentFilters.time].flat().filter(Boolean) : [],
+    budget: currentFilters.budget ? [currentFilters.budget].flat().filter(Boolean) : [],
+    tags: currentFilters.tags || [],
+    diet: currentFilters.diet || [],
+    season: currentFilters.season || [],
+    sort: currentFilters.sort || 'recent'
+  };
+
+  const readJSONData = () => {
+    if (Array.isArray(window.recipeIndex)) {
+      return window.recipeIndex;
     }
-
-    init() {
-      this.bindEvents();
-      this.loadFromURL();
-      this.updateUI();
+    const el = document.getElementById('recipes-index');
+    if (!el) return [];
+    try {
+      return JSON.parse(el.textContent || '[]');
+    } catch (error) {
+      console.error('Impossible de lire l\'index des recettes', error);
+      return [];
     }
+  };
 
-    bindEvents() {
-      // Recherche
-      const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
-      const clearSearchBtn = document.getElementById('clear-search') as HTMLElement;
+  const parseURLFilters = () => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      search: params.get('search') || '',
+      category: params.get('category') ? params.get('category').split(',').filter(Boolean) : [],
+      difficulty: params.get('difficulty') ? params.get('difficulty').split(',').filter(Boolean) : [],
+      time: params.get('time') ? params.get('time').split(',').filter(Boolean) : [],
+      budget: params.get('budget') ? params.get('budget').split(',').filter(Boolean) : [],
+      tags: params.get('tags') ? params.get('tags').split(',').filter(Boolean) : [],
+      diet: params.get('diet') ? params.get('diet').split(',').filter(Boolean) : [],
+      season: params.get('season') ? params.get('season').split(',').filter(Boolean) : [],
+      sort: params.get('sort') || 'recent'
+    };
+  };
 
-      searchInput.addEventListener('input', (e) => {
-        const target = e.target as HTMLInputElement;
-        this.filters.search = target.value.trim();
-        this.debouncedFilter();
-        this.updateClearSearchButton();
-      });
+  const buildRecipeIndex = (recipes) => recipes.map(recipe => {
+    const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0) + (recipe.restTime || 0);
+    const tags = Array.isArray(recipe.tags) ? recipe.tags : [];
+    const diet = Array.isArray(recipe.diet) ? recipe.diet : [];
+    const season = Array.isArray(recipe.season) ? recipe.season : [];
+    const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
+    const ingredientNames = ingredients.map((ing) => (typeof ing === 'string' ? ing : ing.name)).join(' ');
 
-      clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        this.filters.search = '';
-        this.filter();
-        this.updateClearSearchButton();
-      });
-
-      // Filtres rapides
-      document.querySelectorAll('.filter-quick-btn').forEach(btn => {
-        const button = btn as HTMLElement;
-        button.addEventListener('click', () => {
-          const filter = button.dataset.filter;
-          const value = button.dataset.value;
-
-          // Mettre à jour le filtre
-          this.filters[filter] = value;
-
-          // Mettre à jour l'interface
-          this.updateQuickButtons();
-          this.updateSelectFilters();
-          this.filter();
-        });
-      });
-
-      // Filtres select
-      ['category', 'difficulty', 'time'].forEach(filter => {
-        const select = document.getElementById(`${filter}-filter`) as HTMLSelectElement;
-        select.addEventListener('change', (e) => {
-          const target = e.target as HTMLSelectElement;
-          this.filters[filter] = target.value;
-          this.updateQuickButtons();
-          this.filter();
-        });
-      });
-
-      // Tri
-      const sortSelect = document.getElementById('sort-filter') as HTMLSelectElement;
-      sortSelect.addEventListener('change', (e) => {
-        const target = e.target as HTMLSelectElement;
-        this.filters.sort = target.value;
-        this.sort();
-      });
-
-      // Effacer les filtres
-      document.getElementById('clear-filters').addEventListener('click', () => {
-        this.clearAllFilters();
-      });
-    }
-
-    debouncedFilter() {
-      clearTimeout(this.filterTimeout);
-      this.filterTimeout = setTimeout(() => {
-        this.filter();
-      }, 300);
-    }
-
-    filter() {
-      this.filteredRecipes = this.recipes.filter((recipe: any) => {
-        // Recherche textuelle
-        if (this.filters.search) {
-          const searchTerm = this.filters.search.toLowerCase();
-          const matchesSearch = recipe.title.toLowerCase().includes(searchTerm) ||
-                               recipe.description?.toLowerCase().includes(searchTerm) ||
-                               recipe.ingredients?.some((ing: string) => ing.toLowerCase().includes(searchTerm));
-          if (!matchesSearch) return false;
-        }
-
-        // Catégorie
-        if (this.filters.category && recipe.category !== this.filters.category) {
-          return false;
-        }
-
-        // Difficulté
-        if (this.filters.difficulty && recipe.difficulty !== this.filters.difficulty) {
-          return false;
-        }
-
-        // Temps
-        if (this.filters.time) {
-          const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
-          switch (this.filters.time) {
-            case '15':
-              if (totalTime >= 15) return false;
-              break;
-            case '30':
-              if (totalTime < 15 || totalTime >= 30) return false;
-              break;
-            case '60':
-              if (totalTime < 30 || totalTime >= 60) return false;
-              break;
-            case '120':
-              if (totalTime < 60) return false;
-              break;
-          }
-        }
-
-        // Tags
-        if (this.filters.tags && this.filters.tags.length > 0) {
-          const recipeTags = recipe.tags || [];
-          const hasMatchingTag = this.filters.tags.some(tag =>
-            recipeTags.some((recipeTag: string) => recipeTag.toLowerCase().includes(tag.toLowerCase()))
-          );
-          if (!hasMatchingTag) return false;
-        }
-
-        return true;
-      });
-
-      this.sort();
-      this.updateResults();
-      this.updateURL();
-    }
-
-    sort() {
-      this.filteredRecipes.sort((a: any, b: any) => {
-        switch (this.filters.sort) {
-          case 'name':
-            return a.title.localeCompare(b.title);
-          case 'time':
-            return (a.prepTime || 0) - (b.prepTime || 0);
-          case 'difficulty':
-            const difficultyOrder = { 'facile': 1, 'moyen': 2, 'difficile': 3 };
-            return difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty];
-          case 'popular':
-            return (b.popularity || 0) - (a.popularity || 0);
-          case 'recent':
-          default:
-            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-        }
-      });
-
-      this.updateResults();
-    }
-
-    updateResults() {
-      // Mettre à jour le compteur
-      const count = this.filteredRecipes.length;
-      const resultsCount = document.getElementById('results-count') as HTMLElement;
-      resultsCount.textContent = `${count} recette${count !== 1 ? 's' : ''} trouvée${count !== 1 ? 's' : ''}`;
-
-      // Dispatcher un événement avec les résultats filtrés
-      window.dispatchEvent(new CustomEvent('recipesFiltered', {
-        detail: { recipes: this.filteredRecipes, filters: this.filters }
-      }));
-    }
-
-    updateQuickButtons() {
-      document.querySelectorAll('.filter-quick-btn').forEach(btn => {
-        const filter = btn.dataset.filter;
-        const value = btn.dataset.value;
-
-        if (this.filters[filter] === value) {
-          btn.classList.remove('bg-mv-cream', 'text-mv-forest');
-          btn.classList.add('bg-mv-leaf', 'text-mv-cream');
-        } else {
-          btn.classList.remove('bg-mv-leaf', 'text-mv-cream');
-          btn.classList.add('bg-mv-cream', 'text-mv-forest');
-        }
-      });
-    }
-
-    updateSelectFilters() {
-      ['category', 'difficulty', 'time'].forEach(filter => {
-        const select = document.getElementById(`${filter}-filter`) as HTMLSelectElement;
-        select.value = this.filters[filter] || '';
-      });
-    }
-
-    updateClearSearchButton() {
-      const clearBtn = document.getElementById('clear-search') as HTMLElement;
-      if (this.filters.search) {
-        clearBtn.classList.remove('hidden');
-      } else {
-        clearBtn.classList.add('hidden');
-      }
-    }
-
-    clearAllFilters() {
-      this.filters = {
-        search: '',
-        category: '',
-        difficulty: '',
-        time: '',
-        sort: 'recent',
-        tags: []
-      };
-
-      // Reset UI
-      const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
-      searchInput.value = '';
-      const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
-      categoryFilter.value = '';
-      const difficultyFilter = document.getElementById('difficulty-filter') as HTMLSelectElement;
-      difficultyFilter.value = '';
-      const timeFilter = document.getElementById('time-filter') as HTMLSelectElement;
-      timeFilter.value = '';
-      const sortFilter = document.getElementById('sort-filter') as HTMLSelectElement;
-      sortFilter.value = 'recent';
-
-      // Reset tags
-      document.querySelectorAll('.tag-filter-checkbox').forEach(checkbox => {
-        (checkbox as HTMLInputElement).checked = false;
-      });
-
-      this.updateQuickButtons();
-      this.updateClearSearchButton();
-      this.filter();
-    }
-
-    updateUI() {
-      this.updateQuickButtons();
-      this.updateSelectFilters();
-      this.updateClearSearchButton();
-      this.updateTagCheckboxes();
-
-      const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
-      const hasActiveFilters = Object.entries(this.filters).some(([key, value]) => {
-        if (key === 'tags') return value && value.length > 0;
-        return value && value !== '' && value !== 'recent';
-      });
-      clearFiltersBtn.disabled = !hasActiveFilters;
-    }
-
-    updateTagCheckboxes() {
-      document.querySelectorAll('.tag-filter-checkbox').forEach(checkbox => {
-        const input = checkbox as HTMLInputElement;
-        input.checked = this.filters.tags.includes(input.value);
-      });
-    }
-
-    loadFromURL() {
-      const urlParams = new URLSearchParams(window.location.search);
-
-      this.filters.search = urlParams.get('search') || '';
-      this.filters.category = urlParams.get('category') || '';
-      this.filters.difficulty = urlParams.get('difficulty') || '';
-      this.filters.time = urlParams.get('time') || '';
-      this.filters.sort = urlParams.get('sort') || 'recent';
-      this.filters.tags = urlParams.get('tags') ? urlParams.get('tags').split(',') : [];
-
-      // Mettre à jour l'interface
-      const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
-      searchInput.value = this.filters.search;
-      this.updateUI();
-    }
-
-    updateURL() {
-      const url = new URL(window.location);
-      const params = url.searchParams;
-
-      // Nettoyer les paramètres existants
-      ['search', 'category', 'difficulty', 'time', 'sort', 'tags'].forEach(key => {
-        params.delete(key);
-      });
-
-      // Ajouter les nouveaux paramètres
-      Object.entries(this.filters).forEach(([key, value]) => {
-        if (key === 'tags' && value && value.length > 0) {
-          params.set(key, value.join(','));
-        } else if (value && value !== '' && value !== 'recent') {
-          params.set(key, value);
-        }
-      });
-
-      // Mettre à jour l'URL sans recharger la page
-      window.history.replaceState({}, '', url.toString());
-    }
-
-    setRecipes(recipes) {
-      this.recipes = recipes;
-      this.extractTags();
-      this.filter();
-    }
-
-    extractTags() {
-      const allTags = new Set<string>();
-      this.recipes.forEach((recipe: any) => {
-        if (recipe.tags) {
-          recipe.tags.forEach((tag: string) => allTags.add(tag));
-        }
-      });
-      this.availableTags = Array.from(allTags).sort();
-      this.renderTags();
-    }
-
-    renderTags() {
-      const tagsContainer = document.getElementById('tags-container');
-      if (!tagsContainer || !this.availableTags) return;
-
-      tagsContainer.innerHTML = this.availableTags.map(tag => `
-        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" class="tag-filter-checkbox form-checkbox h-4 w-4 text-mv-leaf rounded focus:ring-mv-leaf" value="${tag}">
-          <span class="text-sm text-mv-forest">${tag}</span>
-        </label>
-      `).join('');
-
-      // Add event listeners
-      document.querySelectorAll('.tag-filter-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-          const target = e.target as HTMLInputElement;
-          if (target.checked) {
-            this.filters.tags.push(target.value);
-          } else {
-            this.filters.tags = this.filters.tags.filter(tag => tag !== target.value);
-          }
-          this.filter();
-        });
-      });
-    }
-
-    getActiveFilters() {
-      return { ...this.filters };
-    }
-  }
-
-  // Initialiser quand le DOM est prêt
-  document.addEventListener('DOMContentLoaded', () => {
-    window.recipeFilters = new RecipeFilters();
+    return {
+      ...recipe,
+      totalTime,
+      _search: normalizeText([recipe.title, recipe.description, ingredientNames, tags.join(' '), diet.join(' '), season.join(' ')].join(' ')),
+      _tags: tags.map(normalizeText),
+      _diet: diet.map(normalizeText),
+      _season: season.map(normalizeText)
+    };
   });
 
-  // Exposer la classe globalement
-  window.RecipeFilters = RecipeFilters;
+  const applyURLFilters = () => {
+    const urlFilters = parseURLFilters();
+    Object.assign(filterState, urlFilters);
+  };
+
+  const updateURL = () => {
+    const params = new URLSearchParams();
+
+    if (filterState.search) params.set('search', filterState.search);
+    if (filterState.category.length) params.set('category', filterState.category.join(','));
+    if (filterState.difficulty.length) params.set('difficulty', filterState.difficulty.join(','));
+    if (filterState.time.length) params.set('time', filterState.time.join(','));
+    if (filterState.budget.length) params.set('budget', filterState.budget.join(','));
+    if (filterState.tags.length) params.set('tags', filterState.tags.join(','));
+    if (filterState.diet.length) params.set('diet', filterState.diet.join(','));
+    if (filterState.season.length) params.set('season', filterState.season.join(','));
+    if (filterState.sort && filterState.sort !== 'recent') params.set('sort', filterState.sort);
+
+    const query = params.toString();
+    const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+    window.history.replaceState({}, '', newUrl);
+  };
+
+  const sortRecipes = (recipes) => {
+    return recipes.sort((a, b) => {
+      switch (filterState.sort) {
+        case 'name':
+          return a.title.localeCompare(b.title);
+        case 'time':
+          return (a.totalTime || 0) - (b.totalTime || 0);
+        case 'difficulty':
+          return (difficultyOrder[a.difficulty] || 99) - (difficultyOrder[b.difficulty] || 99);
+        case 'rating':
+          return (b.rating || 0) - (a.rating || 0);
+        case 'popular':
+          return (b.isPopular ? 1 : 0) - (a.isPopular ? 1 : 0) || (b.rating || 0) - (a.rating || 0);
+        case 'recent':
+        default:
+          return new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime();
+      }
+    });
+  };
+
+  const matchesFilters = (recipe) => {
+    if (filterState.search) {
+      const term = normalizeText(filterState.search);
+      if (!recipe._search.includes(term)) return false;
+    }
+
+    if (filterState.category.length > 0) {
+      const selected = filterState.category.map(normalizeText);
+      if (!selected.includes(normalizeText(recipe.category))) return false;
+    }
+    if (filterState.difficulty.length > 0) {
+      const selected = filterState.difficulty.map(normalizeText);
+      if (!selected.includes(normalizeText(recipe.difficulty))) return false;
+    }
+    if (filterState.budget.length > 0) {
+      const selected = filterState.budget.map(normalizeText);
+      if (!selected.includes(normalizeText(recipe.budget))) return false;
+    }
+
+    if (filterState.time.length > 0) {
+      const total = recipe.totalTime || 0;
+      const matchesAny = filterState.time.some((value) => {
+        switch (value) {
+          case '15':
+            return total < 15;
+          case '30':
+            return total >= 15 && total < 30;
+          case '60':
+            return total >= 30 && total < 60;
+          case '120':
+            return total >= 60;
+          default:
+            return true;
+        }
+      });
+      if (!matchesAny) return false;
+    }
+
+    if (filterState.tags.length > 0) {
+      const selectedTags = filterState.tags.map(normalizeText);
+      const hasTag = selectedTags.some((tag) => recipe._tags.includes(tag));
+      if (!hasTag) return false;
+    }
+
+    if (filterState.diet.length > 0) {
+      const selected = filterState.diet.map(normalizeText);
+      const hasDiet = selected.some((diet) => recipe._diet.includes(diet));
+      if (!hasDiet) return false;
+    }
+
+    if (filterState.season.length > 0) {
+      const selected = filterState.season.map(normalizeText);
+      const hasSeason = selected.some((season) => recipe._season.includes(season));
+      if (!hasSeason) return false;
+    }
+
+    return true;
+  };
+
+  const updateActiveFilters = () => {
+    const container = document.getElementById('active-filters');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const addChip = (label, onRemove) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'mv-chip hover:bg-mv-leaf hover:text-mv-cream transition-colors';
+      button.textContent = label;
+      button.addEventListener('click', onRemove);
+      container.appendChild(button);
+    };
+
+    const getInputLabel = (selector, value) => {
+      const input = Array.from(document.querySelectorAll(selector)).find((el) => el.value === value);
+      return input?.dataset?.label || input?.textContent || value;
+    };
+
+    if (filterState.search) {
+      addChip(`Recherche: ${filterState.search}`, () => {
+        filterState.search = '';
+        document.getElementById('recipe-search').value = '';
+        applyFilters();
+      });
+    }
+
+    filterState.category.forEach((value) => {
+      addChip(getInputLabel(`.filter-checkbox[data-filter="category"][value="${value}"]`, value), () => {
+        filterState.category = filterState.category.filter((item) => item !== value);
+        const checkbox = document.querySelector(`.filter-checkbox[data-filter="category"][value="${value}"]`);
+        if (checkbox) checkbox.checked = false;
+        applyFilters();
+      });
+    });
+
+    filterState.difficulty.forEach((value) => {
+      addChip(getInputLabel(`.filter-checkbox[data-filter="difficulty"][value="${value}"]`, value), () => {
+        filterState.difficulty = filterState.difficulty.filter((item) => item !== value);
+        const checkbox = document.querySelector(`.filter-checkbox[data-filter="difficulty"][value="${value}"]`);
+        if (checkbox) checkbox.checked = false;
+        applyFilters();
+      });
+    });
+
+    filterState.time.forEach((value) => {
+      addChip(getInputLabel(`.filter-checkbox[data-filter="time"][value="${value}"]`, value), () => {
+        filterState.time = filterState.time.filter((item) => item !== value);
+        const checkbox = document.querySelector(`.filter-checkbox[data-filter="time"][value="${value}"]`);
+        if (checkbox) checkbox.checked = false;
+        applyFilters();
+      });
+    });
+
+    filterState.budget.forEach((value) => {
+      addChip(getInputLabel(`.filter-checkbox[data-filter="budget"][value="${value}"]`, value), () => {
+        filterState.budget = filterState.budget.filter((item) => item !== value);
+        const checkbox = document.querySelector(`.filter-checkbox[data-filter="budget"][value="${value}"]`);
+        if (checkbox) checkbox.checked = false;
+        applyFilters();
+      });
+    });
+
+    filterState.tags.forEach((tag) => {
+      addChip(`#${tag}`, () => {
+        filterState.tags = filterState.tags.filter((value) => value !== tag);
+        const checkbox = document.querySelector(`.filter-checkbox[data-filter="tags"][value="${tag}"]`);
+        if (checkbox) checkbox.checked = false;
+        applyFilters();
+      });
+    });
+
+    filterState.diet.forEach((diet) => {
+      addChip(getInputLabel(`.filter-checkbox[data-filter="diet"][value="${diet}"]`, diet), () => {
+        filterState.diet = filterState.diet.filter((value) => value !== diet);
+        const checkbox = document.querySelector(`.filter-checkbox[data-filter="diet"][value="${diet}"]`);
+        if (checkbox) checkbox.checked = false;
+        applyFilters();
+      });
+    });
+
+    filterState.season.forEach((season) => {
+      addChip(getInputLabel(`.filter-checkbox[data-filter="season"][value="${season}"]`, season), () => {
+        filterState.season = filterState.season.filter((value) => value !== season);
+        const checkbox = document.querySelector(`.filter-checkbox[data-filter="season"][value="${season}"]`);
+        if (checkbox) checkbox.checked = false;
+        applyFilters();
+      });
+    });
+  };
+
+  const updateClearButton = () => {
+    const clearBtn = document.getElementById('clear-filters');
+    const hasFilters = Boolean(
+      filterState.search ||
+      filterState.category.length ||
+      filterState.difficulty.length ||
+      filterState.time.length ||
+      filterState.budget.length ||
+      filterState.tags.length ||
+      filterState.diet.length ||
+      filterState.season.length
+    );
+    clearBtn.disabled = !hasFilters;
+
+    const countBadge = document.getElementById('filters-count');
+    if (countBadge) {
+      const count =
+        (filterState.search ? 1 : 0) +
+        filterState.category.length +
+        filterState.difficulty.length +
+        filterState.time.length +
+        filterState.budget.length +
+        filterState.tags.length +
+        filterState.diet.length +
+        filterState.season.length;
+      countBadge.textContent = count.toString();
+    }
+
+    const updateCount = (id, count) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = count ? `${count} sélection` : 'Tous';
+    };
+
+    updateCount('category-count', filterState.category.length);
+    updateCount('difficulty-count', filterState.difficulty.length);
+    updateCount('time-count', filterState.time.length);
+    updateCount('budget-count', filterState.budget.length);
+    updateCount('tags-count', filterState.tags.length);
+    updateCount('diet-count', filterState.diet.length);
+    updateCount('season-count', filterState.season.length);
+  };
+
+  let recipeIndex = [];
+  let cardsById = new Map();
+  let grid = null;
+  let emptyState = null;
+
+  const renderCards = (recipes) => {
+    if (!grid) return;
+    const fragment = document.createDocumentFragment();
+    const visibleIds = new Set();
+
+    recipes.forEach((recipe) => {
+      const card = cardsById.get(recipe.id);
+      if (!card) return;
+      visibleIds.add(recipe.id);
+      card.classList.remove('hidden');
+      fragment.appendChild(card);
+    });
+
+    cardsById.forEach((card, id) => {
+      if (!visibleIds.has(id)) {
+        card.classList.add('hidden');
+      }
+    });
+
+    grid.appendChild(fragment);
+
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', recipes.length !== 0);
+    }
+  };
+
+  const updateResultsCount = (count) => {
+    const resultsCount = document.getElementById('results-count');
+    resultsCount.textContent = count.toString();
+  };
+
+  const applyFilters = () => {
+    const filtered = recipeIndex.filter(matchesFilters);
+    const sorted = sortRecipes(filtered);
+
+    updateResultsCount(sorted.length);
+    updateActiveFilters();
+    updateClearButton();
+    updateURL();
+    renderCards(sorted);
+
+    window.dispatchEvent(new CustomEvent('recipesFiltered', {
+      detail: { recipes: sorted, filters: { ...filterState } }
+    }));
+  };
+
+  const bindEvents = () => {
+    const searchInput = document.getElementById('recipe-search');
+    const clearSearchBtn = document.getElementById('clear-search');
+    const sortSelect = document.getElementById('sort-filter');
+    const filtersPanel = document.getElementById('filters-panel');
+    const filtersAdvanced = document.getElementById('filters-advanced');
+    const filtersToggle = document.getElementById('filters-toggle');
+
+    const debounce = (fn, delay = 300) => {
+      let timeout;
+      return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), delay);
+      };
+    };
+
+    searchInput.addEventListener('input', debounce(() => {
+      filterState.search = searchInput.value.trim();
+      clearSearchBtn.classList.toggle('hidden', !filterState.search);
+      applyFilters();
+    }));
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      filterState.search = '';
+      clearSearchBtn.classList.add('hidden');
+      applyFilters();
+    });
+
+    sortSelect.addEventListener('change', () => {
+      filterState.sort = sortSelect.value;
+      applyFilters();
+    });
+
+    document.querySelectorAll('.filter-checkbox').forEach((checkbox) => {
+      checkbox.addEventListener('change', () => {
+        const key = checkbox.dataset.filter;
+        if (!key || !filterState[key]) return;
+        const checkedValues = Array.from(document.querySelectorAll(`.filter-checkbox[data-filter="${key}"]`))
+          .filter((input) => input.checked)
+          .map((input) => input.value);
+        filterState[key] = checkedValues;
+        applyFilters();
+      });
+    });
+
+    document.querySelectorAll('.filter-trigger').forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        const dropdown = trigger.closest('.filter-dropdown');
+        if (!dropdown) return;
+        const menu = dropdown.querySelector('.filter-menu');
+        if (!menu) return;
+        const isOpen = !menu.classList.contains('hidden');
+        document.querySelectorAll('.filter-menu').forEach((panel) => panel.classList.add('hidden'));
+        if (!isOpen) menu.classList.remove('hidden');
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target.closest('.filter-dropdown')) return;
+      document.querySelectorAll('.filter-menu').forEach((panel) => panel.classList.add('hidden'));
+    });
+
+    if (filtersToggle) {
+      filtersToggle.addEventListener('click', () => {
+        const isHidden = filtersPanel.classList.contains('hidden');
+        filtersPanel.classList.toggle('hidden', !isHidden);
+        filtersAdvanced.classList.toggle('hidden', !isHidden);
+        filtersToggle.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+      });
+    }
+
+    document.getElementById('clear-filters').addEventListener('click', () => {
+      filterState.search = '';
+      filterState.category = [];
+      filterState.difficulty = [];
+      filterState.time = [];
+      filterState.budget = [];
+      filterState.tags = [];
+      filterState.diet = [];
+      filterState.season = [];
+      filterState.sort = 'recent';
+
+      searchInput.value = '';
+      clearSearchBtn.classList.add('hidden');
+      sortSelect.value = 'recent';
+      document.querySelectorAll('.filter-checkbox').forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+
+      applyFilters();
+    });
+  };
+
+  const syncUI = () => {
+    document.getElementById('recipe-search').value = filterState.search || '';
+    document.getElementById('clear-search').classList.toggle('hidden', !filterState.search);
+    document.getElementById('sort-filter').value = filterState.sort || 'recent';
+    document.querySelectorAll('.filter-checkbox').forEach((checkbox) => {
+      const key = checkbox.dataset.filter;
+      if (!key || !filterState[key]) return;
+      checkbox.checked = filterState[key].includes(checkbox.value);
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyURLFilters();
+
+    recipeIndex = buildRecipeIndex(readJSONData());
+    grid = document.getElementById('recipes-grid');
+    emptyState = document.getElementById('recipes-empty');
+
+    const cards = document.querySelectorAll('[data-recipe-card]');
+    cardsById = new Map(Array.from(cards).map((card) => [card.dataset.recipeId, card]));
+
+    const sanitizeFilters = () => {
+      const checkboxValues = (key) =>
+        new Set(
+          Array.from(document.querySelectorAll(`.filter-checkbox[data-filter="${key}"]`))
+            .map((input) => input.value)
+            .filter(Boolean)
+        );
+
+      const categoryValues = checkboxValues('category');
+      const difficultyValues = checkboxValues('difficulty');
+      const timeValues = checkboxValues('time');
+      const budgetValues = checkboxValues('budget');
+      const tagValues = checkboxValues('tags');
+      const dietValues = checkboxValues('diet');
+      const seasonValues = checkboxValues('season');
+      const sortValues = new Set(['recent', 'popular', 'rating', 'time', 'difficulty', 'name']);
+
+      filterState.category = filterState.category.filter((value) => categoryValues.has(value));
+      filterState.difficulty = filterState.difficulty.filter((value) => difficultyValues.has(value));
+      filterState.time = filterState.time.filter((value) => timeValues.has(value));
+      filterState.budget = filterState.budget.filter((value) => budgetValues.has(value));
+      if (filterState.sort && !sortValues.has(filterState.sort)) filterState.sort = 'recent';
+
+      filterState.tags = filterState.tags.filter((tag) => tagValues.has(tag));
+      filterState.diet = filterState.diet.filter((diet) => dietValues.has(diet));
+      filterState.season = filterState.season.filter((season) => seasonValues.has(season));
+    };
+
+    sanitizeFilters();
+    syncUI();
+    bindEvents();
+    applyFilters();
+  });
 </script>
+
+<style>
+  .filter-dropdown {
+    position: relative;
+  }
+
+  .filter-trigger {
+    cursor: pointer;
+  }
+
+  .filter-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    max-height: 14rem;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid rgba(74, 124, 89, 0.2);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(42, 61, 52, 0.12), 0 4px 6px -2px rgba(42, 61, 52, 0.05);
+    z-index: 20;
+  }
+
+  .filter-option + .filter-option {
+    margin-top: 0.35rem;
+  }
+
+  .filter-checkbox {
+    accent-color: #4A7C59;
+  }
+</style>

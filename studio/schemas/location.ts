@@ -67,7 +67,15 @@ export const location = {
       options: {
         hotspot: true
       },
-      description: 'Photo de l\'espace'
+      description: 'Photo de l\'espace',
+      validation: (Rule) => Rule.required()
     }
-  ]
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'type',
+      media: 'image'
+    }
+  }
 }

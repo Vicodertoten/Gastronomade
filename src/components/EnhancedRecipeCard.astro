@@ -9,12 +9,17 @@ export interface Props {
     image?: string;
     prepTime?: number;
     cookTime?: number;
+    restTime?: number;
+    servings?: number;
     difficulty?: 'facile' | 'moyen' | 'difficile';
     category?: string;
+    categoryValue?: string;
     rating?: number;
     isNew?: boolean;
     isPopular?: boolean;
     tags?: string[];
+    ingredients?: string[];
+    publishedAt?: string;
   };
   showFavoriteButton?: boolean;
   showShoppingListButton?: boolean;
@@ -36,6 +41,11 @@ const formatTime = (minutes: number) => {
   return mins > 0 ? `${hours}h${mins}min` : `${hours}h`;
 };
 
+const getTotalTime = (prep?: number, cook?: number, rest?: number) => {
+  const total = (prep || 0) + (cook || 0) + (rest || 0);
+  return total > 0 ? total : undefined;
+};
+
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
     case 'facile': return 'text-mv-leaf bg-mv-leaf-20 border border-mv-leaf-30';
@@ -55,7 +65,16 @@ const getDifficultyIcon = (difficulty: string) => {
 };
 ---
 
-<article class={`enhanced-recipe-card group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 hover:border-mv-leaf ${compact ? 'p-4' : 'p-6'}`} data-recipe-id={recipe.id} data-recipe-slug={recipe.slug} data-recipe-title={recipe.title} data-recipe-category={recipe.category} data-recipe-difficulty={recipe.difficulty} data-recipe-tags={recipe.tags?.join(',')} data-recipe-ingredients={recipe.ingredients?.join(',')}>
+<article
+  class={`enhanced-recipe-card group relative mv-card hover:border-mv-leaf transition-all duration-300 overflow-hidden ${compact ? 'p-4' : 'p-6'}`}
+  data-recipe-id={recipe.id}
+  data-recipe-slug={recipe.slug}
+  data-recipe-title={recipe.title}
+  data-recipe-category={recipe.categoryValue || recipe.category}
+  data-recipe-difficulty={recipe.difficulty}
+  data-recipe-tags={recipe.tags?.join(',')}
+  data-recipe-ingredients={recipe.ingredients?.join(',')}
+>
   <!-- Badge Nouveau/Populaire -->
   <div class="absolute top-3 left-3 z-10 flex gap-2">
     {recipe.isNew && (
@@ -74,16 +93,18 @@ const getDifficultyIcon = (difficulty: string) => {
   </div>
 
   <!-- Boutons d'action -->
-  <div class="absolute top-3 right-3 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+  <div class="absolute top-3 right-3 z-10 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
     {showFavoriteButton && (
       <button
         class="favorite-btn w-8 h-8 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center hover:scale-110"
         data-recipe-id={recipe.id}
+        data-recipe-title={recipe.title}
         aria-label="Ajouter aux favoris"
       >
-        <svg class="w-4 h-4 text-mv-forest-60 hover:text-mv-coral transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="favorite-icon w-4 h-4 text-mv-forest-60 hover:text-mv-coral transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
         </svg>
+        <span class="favorite-text sr-only">Ajouter aux favoris</span>
       </button>
     )}
 
@@ -91,9 +112,10 @@ const getDifficultyIcon = (difficulty: string) => {
       <button
         class="shopping-btn w-8 h-8 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center hover:scale-110"
         data-recipe-id={recipe.id}
+        data-recipe-title={recipe.title}
         aria-label="Ajouter à la liste de courses"
       >
-        <svg class="w-4 h-4 text-gray-400 hover:text-mv-leaf transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-mv-forest-60 hover:text-mv-leaf transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
         </svg>
       </button>
@@ -149,18 +171,22 @@ const getDifficultyIcon = (difficulty: string) => {
     <div class="flex items-center justify-between text-sm">
       <div class="flex items-center space-x-4">
         <!-- Temps de préparation -->
-        {(recipe.prepTime || recipe.cookTime) && (
+        {getTotalTime(recipe.prepTime, recipe.cookTime, recipe.restTime) && (
           <div class="flex items-center text-mv-forest-70">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12,6 12,12 16,14"/>
             </svg>
-            {recipe.prepTime && recipe.cookTime ?
-              `${formatTime(recipe.prepTime + recipe.cookTime)}` :
-              recipe.prepTime ?
-                `Prep: ${formatTime(recipe.prepTime)}` :
-                `Cuisson: ${formatTime(recipe.cookTime)}`
-            }
+            {formatTime(getTotalTime(recipe.prepTime, recipe.cookTime, recipe.restTime) as number)}
+          </div>
+        )}
+
+        {recipe.servings && (
+          <div class="flex items-center text-mv-forest-70">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857m0 0a5 5 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            {recipe.servings} pers.
           </div>
         )}
 
@@ -172,33 +198,9 @@ const getDifficultyIcon = (difficulty: string) => {
           </div>
         )}
       </div>
-
-      <!-- Note -->
-      {recipe.rating && (
-        <div class="flex items-center text-mv-coral">
-          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-          </svg>
-          <span class="text-sm font-medium text-mv-forest">{recipe.rating.toFixed(1)}</span>
-        </div>
-      )}
     </div>
 
-    <!-- Tags -->
-    {recipe.tags && recipe.tags.length > 0 && (
-      <div class="flex flex-wrap gap-1">
-        {recipe.tags.slice(0, 3).map(tag => (
-          <span class="inline-block px-2 py-1 text-xs bg-mv-cream text-mv-forest rounded-full">
-            #{tag}
-          </span>
-        ))}
-        {recipe.tags.length > 3 && (
-          <span class="inline-block px-2 py-1 text-xs bg-mv-cream text-mv-forest-70 rounded-full">
-            +{recipe.tags.length - 3}
-          </span>
-        )}
-      </div>
-    )}
+    <!-- Tags retirés pour alléger la carte -->
   </div>
 
   <!-- Micro-interactions -->
@@ -238,7 +240,7 @@ const getDifficultyIcon = (difficulty: string) => {
   }
 
   /* États des boutons favoris */
-  .favorite-btn.active svg {
+  .favorite-btn.favorited .favorite-icon {
     fill: currentColor;
     color: #ef4444;
   }
@@ -276,14 +278,14 @@ const getDifficultyIcon = (difficulty: string) => {
   class EnhancedRecipeCard {
     constructor(cardElement) {
       this.card = cardElement;
-      this.recipeId = this.card.querySelector('[data-recipe-id]')?.dataset.recipeId;
+      this.recipeId = this.card.dataset.recipeId || this.card.querySelector('[data-recipe-id]')?.dataset.recipeId;
       this.recipeSlug = this.card.dataset.recipeSlug || this.recipeId; // Utiliser le slug ou l'ID comme fallback
+      this.card.enhancedRecipeCard = this;
       this.init();
     }
 
     init() {
       this.bindEvents();
-      this.loadStates();
     }
 
     bindEvents() {
@@ -293,7 +295,6 @@ const getDifficultyIcon = (difficulty: string) => {
         favoriteBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          this.toggleFavorite();
         });
       }
 
@@ -330,52 +331,10 @@ const getDifficultyIcon = (difficulty: string) => {
       }
     }
 
-    toggleFavorite() {
-      const btn = this.card.querySelector('.favorite-btn');
-      const isActive = btn.classList.contains('active');
-
-      if (isActive) {
-        this.removeFromFavorites();
-        btn.classList.remove('active');
-      } else {
-        this.addToFavorites();
-        btn.classList.add('active');
-      }
-
-      // Animation de feedback
-      btn.style.transform = 'scale(1.2)';
-      setTimeout(() => {
-        btn.style.transform = '';
-      }, 150);
-    }
-
-    addToFavorites() {
-      const favorites = JSON.parse(localStorage.getItem('recipeFavorites') || '[]');
-      if (!favorites.includes(this.recipeId)) {
-        favorites.push(this.recipeId);
-        localStorage.setItem('recipeFavorites', JSON.stringify(favorites));
-      }
-
-      // Notification
-      this.showNotification('Recette ajoutée aux favoris !', 'success');
-    }
-
-    removeFromFavorites() {
-      const favorites = JSON.parse(localStorage.getItem('recipeFavorites') || '[]');
-      const index = favorites.indexOf(this.recipeId);
-      if (index > -1) {
-        favorites.splice(index, 1);
-        localStorage.setItem('recipeFavorites', JSON.stringify(favorites));
-      }
-
-      // Notification
-      this.showNotification('Recette retirée des favoris', 'info');
-    }
-
     addToShoppingList() {
       // Déclencher l'événement pour ouvrir le panneau de liste de courses
       window.dispatchEvent(new CustomEvent('addToShoppingList', {
-        detail: { recipeId: this.recipeId }
+        detail: { recipeId: this.recipeId, recipeTitle: this.card.dataset.recipeTitle }
       }));
 
       // Animation de feedback
@@ -384,8 +343,6 @@ const getDifficultyIcon = (difficulty: string) => {
       setTimeout(() => {
         btn.style.transform = '';
       }, 150);
-
-      this.showNotification('Ingrédients ajoutés à la liste !', 'success');
     }
 
     navigateToRecipe() {
@@ -393,37 +350,6 @@ const getDifficultyIcon = (difficulty: string) => {
       window.location.href = `/recette/${this.recipeSlug}`;
     }
 
-    loadStates() {
-      // Charger l'état des favoris
-      const favorites = JSON.parse(localStorage.getItem('recipeFavorites') || '[]');
-      if (favorites.includes(this.recipeId)) {
-        this.card.querySelector('.favorite-btn')?.classList.add('active');
-      }
-    }
-
-    showNotification(message, type = 'info') {
-      // Créer une notification temporaire
-      const notification = document.createElement('div');
-      notification.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white text-sm font-medium shadow-lg transform translate-x-full transition-transform duration-300 ${
-        type === 'success' ? 'bg-mv-leaf' : 'bg-mv-forest'
-      }`;
-      notification.textContent = message;
-
-      document.body.appendChild(notification);
-
-      // Animation d'entrée
-      setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-      }, 100);
-
-      // Supprimer après 3 secondes
-      setTimeout(() => {
-        notification.style.transform = 'translateX(full)';
-        setTimeout(() => {
-          document.body.removeChild(notification);
-        }, 300);
-      }, 3000);
-    }
   }
 
   // Initialiser toutes les cartes de recettes

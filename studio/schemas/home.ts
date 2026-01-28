@@ -29,6 +29,13 @@ export const home = {
       initialValue: 'Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands'
     },
     {
+      name: 'heroBackgroundImage',
+      title: 'Image de fond du hero',
+      type: 'image',
+      options: { hotspot: true },
+      description: 'Texte net sur les côtés et transparent au centre pour la première section.'
+    },
+    {
       name: 'locationSectionTitle',
       title: 'Titre section location',
       type: 'string',

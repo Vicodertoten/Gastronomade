@@ -28,6 +28,9 @@ export default defineConfig({
                     S.listItem().title('À propos').child(S.document().schemaType('about').documentId('about')),
                     S.listItem().title('Thermomix').child(S.document().schemaType('thermomix').documentId('thermomix')),
                     S.listItem().title('Contact').child(S.document().schemaType('contact').documentId('contact')),
+                    S.listItem()
+                      .title('Agenda entreprises')
+                      .child(S.document().schemaType('companyAgenda').documentId('companyAgenda')),
                   ])
               ),
 

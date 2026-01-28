@@ -16,8 +16,8 @@
   </button>
 
   <!-- Panneau de la liste de courses -->
-  <div id="shopping-panel" class="hidden absolute top-16 right-0 bg-white rounded-lg shadow-xl border border-gray-200 w-80 max-h-96 overflow-hidden">
-    <div class="p-4 border-b border-gray-200">
+  <div id="shopping-panel" class="hidden absolute top-16 right-0 bg-white rounded-lg shadow-xl border border-mv-leaf-20 w-80 max-h-96 overflow-hidden">
+    <div class="p-4 border-b border-mv-leaf-20">
       <h3 class="font-serif font-bold text-mv-forest text-lg">Ma liste de courses</h3>
       <p class="text-sm text-mv-forest-70 mt-1">Ingrédients pour vos recettes</p>
     </div>
@@ -37,14 +37,14 @@
       <div class="flex space-x-2">
         <button
           id="clear-shopping-list"
-          class="flex-1 bg-mv-cream text-mv-forest px-3 py-2 rounded-lg text-sm font-medium hover:bg-mv-leaf-10 transition-colors disabled:opacity-50"
+          class="mv-btn mv-btn-secondary flex-1 bg-mv-cream text-mv-forest text-sm hover:bg-mv-leaf-10 transition-colors disabled:opacity-50"
           disabled
         >
           Vider
         </button>
         <button
           id="export-shopping-list"
-          class="flex-1 bg-mv-forest text-mv-cream px-3 py-2 rounded-lg text-sm font-medium hover:bg-mv-leaf transition-colors disabled:opacity-50"
+          class="mv-btn mv-btn-primary flex-1 bg-mv-forest text-mv-cream text-sm hover:bg-mv-leaf transition-colors disabled:opacity-50"
           disabled
         >
           Exporter
@@ -76,6 +76,22 @@
       this.clearBtn.addEventListener('click', () => this.clearList());
       this.exportBtn.addEventListener('click', () => this.exportList());
 
+      // Ajout depuis les cartes/recettes
+      window.addEventListener('addToShoppingList', (event) => {
+        const detail = event.detail || {};
+        if (detail.ingredients && Array.isArray(detail.ingredients)) {
+          this.addIngredients(detail.ingredients, { sourceTitle: detail.recipeTitle });
+          return;
+        }
+
+        if (detail.recipeId) {
+          const recipe = this.findRecipe(detail.recipeId);
+          if (recipe && Array.isArray(recipe.ingredients)) {
+            this.addIngredients(recipe.ingredients, { sourceTitle: recipe.title || detail.recipeTitle });
+          }
+        }
+      });
+
       // Fermer en cliquant ailleurs
       document.addEventListener('click', (e) => {
         if (!this.panel.contains(e.target) && !this.toggleBtn.contains(e.target)) {
@@ -91,6 +107,28 @@
       });
 
       this.updateUI();
+    }
+
+    findRecipe(recipeId) {
+      let index = window.recipeIndex || window.__recipesIndex || null;
+      if (!index) {
+        const dataEl = document.getElementById('recipes-index');
+        if (dataEl?.textContent) {
+          try {
+            index = JSON.parse(dataEl.textContent);
+            window.recipeIndex = index;
+          } catch (error) {
+            console.error("Impossible de lire l'index des recettes", error);
+          }
+        }
+      }
+      if (Array.isArray(index)) {
+        return index.find((recipe) => recipe.id === recipeId);
+      }
+      if (index && typeof index === 'object') {
+        return index[recipeId] || null;
+      }
+      return null;
     }
 
     togglePanel() {
@@ -111,38 +149,121 @@
       this.panel.classList.remove('animate-in', 'slide-in-from-right-2');
     }
 
-    addItem(ingredient, quantity = 1, unit = '') {
-      const key = ingredient.toLowerCase().trim();
+    normalizeName(value) {
+      return (value || '').toString().toLowerCase().trim();
+    }
+
+    parseQuantity(value) {
+      if (value === null || value === undefined) return null;
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+
+      const raw = value.toString().trim().replace(',', '.');
+      if (!raw) return null;
+
+      const mixedFractionMatch = raw.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+      if (mixedFractionMatch) {
+        const whole = Number(mixedFractionMatch[1]);
+        const num = Number(mixedFractionMatch[2]);
+        const den = Number(mixedFractionMatch[3]);
+        if (den) return whole + num / den;
+      }
+
+      const fractionMatch = raw.match(/^(\d+)\/(\d+)$/);
+      if (fractionMatch) {
+        const num = Number(fractionMatch[1]);
+        const den = Number(fractionMatch[2]);
+        if (den) return num / den;
+      }
+
+      const numeric = Number(raw);
+      if (!Number.isNaN(numeric)) return numeric;
+
+      return null;
+    }
+
+    formatQuantity(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) return '';
+      const rounded = Math.round(value * 100) / 100;
+      const str = rounded.toString();
+      return str.replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+    }
+
+    buildKey(name, unit, quantity, numericQuantity) {
+      const normalizedName = this.normalizeName(name);
+      const normalizedUnit = this.normalizeName(unit);
+      if (numericQuantity !== null) {
+        return `${normalizedName}|${normalizedUnit}`;
+      }
+      const quantityPart = (quantity || '').toString().trim();
+      return `${normalizedName}|${normalizedUnit}|${quantityPart}`;
+    }
+
+    addItem(name, quantity = '', unit = '', options = {}) {
+      const normalizedName = this.normalizeName(name);
+      if (!normalizedName) return;
+
+      const quantityValue = this.parseQuantity(quantity);
+      const key = this.buildKey(name, unit, quantity, quantityValue);
       const existing = this.items.get(key);
 
-      if (existing) {
-        existing.quantity += quantity;
-      } else {
+      if (existing && quantityValue !== null && existing.numericQuantity !== null) {
+        existing.numericQuantity += quantityValue;
+        existing.quantity = this.formatQuantity(existing.numericQuantity);
+      } else if (!existing) {
         this.items.set(key, {
-          name: ingredient,
-          quantity: quantity,
-          unit: unit,
-          checked: false
+          key,
+          name,
+          quantity: quantityValue !== null ? this.formatQuantity(quantityValue) : (quantity || '').toString().trim(),
+          unit: unit || '',
+          checked: false,
+          numericQuantity: quantityValue
         });
       }
 
+      if (!options.skipSave) {
+        this.saveToStorage();
+      }
+      if (!options.skipUpdate) {
+        this.updateUI();
+      }
+
+      if (!options.silent) {
+        this.showFeedback(`"${name}" ajouté à la liste`);
+      }
+    }
+
+    addIngredients(ingredients, options = {}) {
+      if (!Array.isArray(ingredients) || ingredients.length === 0) {
+        return;
+      }
+
+      ingredients.forEach((ingredient) => {
+        if (!ingredient || !ingredient.name) return;
+        this.addItem(
+          ingredient.name,
+          ingredient.quantity || '',
+          ingredient.unit || '',
+          { silent: true, skipSave: true, skipUpdate: true }
+        );
+      });
+
       this.saveToStorage();
       this.updateUI();
 
-      // Animation de feedback
-      this.showFeedback(`"${ingredient}" ajouté à la liste`);
+      if (!options.silent) {
+        const label = options.sourceTitle ? ` (${options.sourceTitle})` : '';
+        this.showFeedback(`${ingredients.length} ingrédient${ingredients.length > 1 ? 's' : ''} ajouté${ingredients.length > 1 ? 's' : ''}${label}`);
+      }
     }
 
-    removeItem(ingredient) {
-      const key = ingredient.toLowerCase().trim();
-      this.items.delete(key);
+    removeItem(itemKey) {
+      this.items.delete(itemKey);
       this.saveToStorage();
       this.updateUI();
     }
 
-    toggleItem(ingredient) {
-      const key = ingredient.toLowerCase().trim();
-      const item = this.items.get(key);
+    toggleItem(itemKey) {
+      const item = this.items.get(itemKey);
       if (item) {
         item.checked = !item.checked;
         this.saveToStorage();
@@ -160,9 +281,11 @@
 
     exportList() {
       const items = Array.from(this.items.values());
-      const text = items.map(item =>
-        `${item.checked ? '✓' : '○'} ${item.quantity} ${item.unit} ${item.name}`
-      ).join('\n');
+      const text = items.map(item => {
+        const quantityText = item.quantity ? `${item.quantity}${item.unit ? ` ${item.unit}` : ''}` : (item.unit || '');
+        const line = quantityText ? `${quantityText} ${item.name}` : item.name;
+        return `${item.checked ? '✓' : '○'} ${line}`;
+      }).join('\n');
 
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
@@ -178,7 +301,6 @@
     updateUI() {
       const items = Array.from(this.items.values());
       const totalItems = items.length;
-      const checkedItems = items.filter(item => item.checked).length;
 
       // Mettre à jour le badge
       this.countBadge.textContent = totalItems.toString();
@@ -200,28 +322,31 @@
           </div>
         `;
       } else {
-        this.itemsContainer.innerHTML = items.map(item => `
-          <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-mv-cream-50 transition-colors">
-            <input
-              type="checkbox"
-              ${item.checked ? 'checked' : ''}
-              class="shopping-item-checkbox h-4 w-4 text-mv-forest focus:ring-mv-leaf border-mv-leaf-30 rounded"
-              data-ingredient="${item.name}"
-            />
-            <span class="flex-1 text-sm ${item.checked ? 'line-through text-mv-forest-60' : 'text-mv-forest'}">
-              ${item.quantity} ${item.unit} ${item.name}
-            </span>
-            <button
-              class="shopping-item-remove text-mv-coral hover:text-mv-coral-80 p-1 rounded transition-colors"
-              data-ingredient="${item.name}"
-              aria-label="Retirer ${item.name}"
-            >
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-        `).join('');
+        this.itemsContainer.innerHTML = items.map(item => {
+          const quantityText = item.quantity ? `${item.quantity}${item.unit ? ` ${item.unit}` : ''}` : (item.unit || '');
+          return `
+            <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-mv-cream-50 transition-colors">
+              <input
+                type="checkbox"
+                ${item.checked ? 'checked' : ''}
+                class="shopping-item-checkbox h-4 w-4 text-mv-forest focus:ring-mv-leaf border-mv-leaf-30 rounded"
+                data-item-key="${item.key}"
+              />
+              <span class="flex-1 text-sm ${item.checked ? 'line-through text-mv-forest-60' : 'text-mv-forest'}">
+                ${quantityText ? `${quantityText} ` : ''}${item.name}
+              </span>
+              <button
+                class="shopping-item-remove text-mv-coral hover:text-mv-coral-80 p-1 rounded transition-colors"
+                data-item-key="${item.key}"
+                aria-label="Retirer ${item.name}"
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          `;
+        }).join('');
 
         // Attacher les événements aux nouveaux éléments
         this.attachItemEvents();
@@ -232,14 +357,15 @@
       // Événements pour les checkboxes
       this.itemsContainer.querySelectorAll('.shopping-item-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', (e) => {
-          this.toggleItem(e.target.dataset.ingredient);
+          this.toggleItem(e.target.dataset.itemKey);
         });
       });
 
       // Événements pour les boutons de suppression
       this.itemsContainer.querySelectorAll('.shopping-item-remove').forEach(button => {
         button.addEventListener('click', (e) => {
-          this.removeItem(e.target.dataset.ingredient);
+          const key = e.currentTarget?.dataset?.itemKey;
+          if (key) this.removeItem(key);
         });
       });
     }
@@ -275,6 +401,12 @@
         if (data) {
           const parsed = JSON.parse(data);
           this.items = new Map(parsed);
+          this.items.forEach((item, key) => {
+            item.key = item.key || key;
+            if (item.numericQuantity === undefined) {
+              item.numericQuantity = this.parseQuantity(item.quantity);
+            }
+          });
         }
       } catch (error) {
         console.error('Erreur lors du chargement:', error);
@@ -283,17 +415,11 @@
     }
 
     // Méthode publique pour ajouter des ingrédients depuis les recettes
-    static addIngredients(ingredients) {
+    static addIngredients(ingredients, options = {}) {
       if (!window.shoppingListManager) {
         window.shoppingListManager = new ShoppingListManager();
       }
-      ingredients.forEach(ingredient => {
-        window.shoppingListManager.addItem(
-          ingredient.name,
-          ingredient.quantity || 1,
-          ingredient.unit || ''
-        );
-      });
+      window.shoppingListManager.addIngredients(ingredients, options);
     }
   }
 

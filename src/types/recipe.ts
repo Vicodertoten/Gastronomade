@@ -2,26 +2,39 @@
 export interface Recipe {
   id: string;
   title: string;
-  category: 'Entrée' | 'Plat' | 'Dessert' | 'Boisson';
-  ingredients: string[];
-  instructions: string; // Peut être du texte ou du blockContent
+  category: 'entree' | 'plat' | 'dessert' | 'boisson' | 'accompagnement';
+  ingredients: Ingredient[];
+  instructions: any; // Peut être du texte ou du blockContent
   isPremium: boolean; // Contenu payant pour l'ebook
   prepTime?: number; // en minutes
   cookTime?: number; // en minutes
+  restTime?: number; // en minutes
   servings?: number;
-  difficulty?: 'Facile' | 'Moyen' | 'Difficile';
+  difficulty?: 'facile' | 'moyen' | 'difficile';
+  budget?: 'economique' | 'intermediaire' | 'genereux';
   tags?: string[]; // Végétarien, Rapide, Thermomix, Saison, etc.
+  diet?: string[];
+  season?: string[];
+  equipment?: string[];
+  allergens?: string[];
+  storage?: string;
   imageUrl?: string;
+  gallery?: any[];
+  subtitle?: string;
   description?: string;
   nutritionalInfo?: NutritionalInfo;
+  highlights?: Array<{ title?: string; text?: string; icon?: string }>;
+  tips?: string[];
+  variations?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 // Interface pour les ingrédients (optionnel, peut être simplifié)
 export interface Ingredient {
+  group?: string;
   name: string;
-  quantity?: number;
+  quantity?: string;
   unit?: string;
   notes?: string;
 }
@@ -57,14 +70,24 @@ export interface SanityRecipe {
   _type: 'recipe';
   title: string;
   category: Recipe['category'];
-  ingredients: string[];
+  ingredients: Ingredient[];
   instructions: any; // blockContent de Sanity
   isPremium: boolean;
   prepTime?: number;
   cookTime?: number;
+  restTime?: number;
   servings?: number;
   difficulty?: Recipe['difficulty'];
   tags?: string[];
+  diet?: string[];
+  season?: string[];
+  equipment?: string[];
+  allergens?: string[];
+  storage?: string;
+  budget?: Recipe['budget'];
+  highlights?: Recipe['highlights'];
+  tips?: Recipe['tips'];
+  variations?: Recipe['variations'];
   image?: {
     _type: 'image';
     asset: {

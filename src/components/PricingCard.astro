@@ -8,12 +8,24 @@ interface Props {
   ctaText: string;
   ctaLink: string;
   highlight?: boolean;
+  imageUrl?: string;
+  imageAlt?: string;
 }
 
-const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = false }: Props = Astro.props;
+const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = false, imageUrl, imageAlt }: Props = Astro.props;
 ---
 
 <div class={`mv-card p-4 sm:p-6 lg:p-8 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${highlight ? 'ring-2 ring-mv-leaf scale-105' : ''} relative`} role="article">
+  {imageUrl && (
+    <div class="mb-5 overflow-hidden rounded-2xl border border-mv-leaf-20 bg-mv-cream">
+      <img
+        src={imageUrl}
+        alt={imageAlt || title}
+        class="h-40 w-full object-cover sm:h-44"
+        loading="lazy"
+      />
+    </div>
+  )}
 
   <div class="text-center mb-6">
     <h3 class="text-xl sm:text-2xl font-serif font-bold text-mv-forest mb-2 leading-tight">{title}</h3>
@@ -23,20 +35,22 @@ const { title, subtitle, price, period, features, ctaText, ctaLink, highlight = 
     </div>
   </div>
 
-  <ul class="space-y-3 mb-6" role="list">
-    {features.map(feature => (
-      <li class="flex items-start" role="listitem">
-        <svg class="h-4 w-4 sm:h-5 sm:w-5 text-mv-leaf mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-        </svg>
-        <span class="text-mv-forest text-sm leading-relaxed">{feature}</span>
-      </li>
-    ))}
-  </ul>
+  {features?.length > 0 && (
+    <ul class="space-y-3 mb-6" role="list">
+      {features.map(feature => (
+        <li class="flex items-start" role="listitem">
+          <svg class="h-4 w-4 sm:h-5 sm:w-5 text-mv-leaf mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          <span class="text-mv-forest text-sm leading-relaxed">{feature}</span>
+        </li>
+      ))}
+    </ul>
+  )}
 
   <a
     href={ctaLink}
-    class={`block w-full text-center py-3 px-4 font-semibold mv-pill text-sm sm:text-base transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 ${
+    class={`mv-btn block w-full text-center text-sm sm:text-base transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-mv-leaf focus:ring-offset-2 ${
       highlight
         ? 'mv-btn-primary'
         : 'mv-btn-secondary'
