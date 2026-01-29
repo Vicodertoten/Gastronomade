@@ -183,7 +183,7 @@ const breadcrumbs = [
 
           <button
             id="add-all-ingredients"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-mv-leaf-20 text-mv-forest hover:bg-mv-cream transition-colors"
+            class="mv-btn mv-btn-secondary hover:bg-mv-cream transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -193,7 +193,7 @@ const breadcrumbs = [
 
           <button
             id="copy-recipe-link"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-mv-leaf-20 text-mv-forest hover:bg-mv-cream transition-colors"
+            class="mv-btn mv-btn-secondary hover:bg-mv-cream transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 8a3 3 0 00-3-3H6a3 3 0 00-3 3v6a3 3 0 003 3h6a3 3 0 003-3m0-6h2a3 3 0 013 3v6a3 3 0 01-3 3h-6a3 3 0 01-3-3"/>
@@ -203,7 +203,7 @@ const breadcrumbs = [
 
           <button
             id="print-recipe"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-mv-leaf-20 text-mv-forest hover:bg-mv-cream transition-colors"
+            class="mv-btn mv-btn-secondary hover:bg-mv-cream transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4h12v5m-3 4H9m-6 5h18v-8H3v8z"/>
@@ -273,7 +273,7 @@ const breadcrumbs = [
         <h2 class="text-xl sm:text-2xl font-serif font-bold text-mv-forest mb-4">Petites affiches</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {recipe.highlights.map((highlight, index) => (
-            <div key={index} class="bg-white border border-mv-leaf-20 rounded-xl p-4 shadow-sm">
+            <div key={index} class="mv-card p-4 shadow-sm">
               <div class="flex items-center gap-2 mb-2">
                 <span class="text-lg">{highlight.icon || '✨'}</span>
                 <h3 class="text-base font-semibold text-mv-forest">{highlight.title}</h3>
@@ -406,7 +406,7 @@ const breadcrumbs = [
     </section>
 
     <section class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white rounded-2xl border border-mv-leaf-20 p-5">
+      <div class="mv-card p-5">
         <h3 class="text-lg font-semibold text-mv-forest mb-3">Infos pratiques</h3>
         {recipe.equipment?.length > 0 && (
           <div class="mb-4">
@@ -436,7 +436,7 @@ const breadcrumbs = [
         )}
       </div>
 
-      <div class="bg-white rounded-2xl border border-mv-leaf-20 p-5">
+      <div class="mv-card p-5">
         <h3 class="text-lg font-semibold text-mv-forest mb-3">Nutrition</h3>
         {recipe.nutrition ? (
           <div class="grid grid-cols-2 gap-3 text-sm text-mv-forest-70">

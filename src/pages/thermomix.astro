@@ -12,12 +12,16 @@ const thermomixData = await sanityClient.fetch<ThermomixData>(queries.thermomix)
     {thermomixData?.featuredImageUrl && (
       <div class="absolute inset-0 hidden lg:block">
         <div
-          class="absolute inset-0 bg-cover bg-center"
+          class="absolute inset-0 bg-cover bg-center hero-image-mask hero-image-mask--strong"
           style={`background-image: url(${thermomixData.featuredImageUrl}?w=1800&auto=format);`}
           aria-hidden="true"
         ></div>
         <div
-          class="absolute inset-0 bg-[linear-gradient(to_left,transparent_0%,transparent_33%,rgba(255,255,255,0.6)_52%,rgba(255,255,255,0.92)_72%,white_100%),linear-gradient(to_bottom,rgba(251,248,241,0)_80%,rgba(251,248,241,1)_100%)]"
+          class="absolute inset-0 bg-[linear-gradient(to_left,transparent_0%,transparent_33%,rgba(255,255,255,0.6)_52%,rgba(255,255,255,0.92)_72%,white_100%)]"
+          aria-hidden="true"
+        ></div>
+        <div
+          class="absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(to_bottom,rgba(251,248,241,0)_0%,rgba(251,248,241,0.7)_55%,rgba(251,248,241,0.95)_100%)]"
           aria-hidden="true"
         ></div>
       </div>

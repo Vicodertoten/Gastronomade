@@ -167,6 +167,27 @@ textarea {
   color: var(--mv-plum);
 }
 
+.hero-image-mask {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 70%,
+    rgba(0, 0, 0, 0.55) 88%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 70%,
+    rgba(0, 0, 0, 0.55) 88%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
 .mv-section-title {
   font-family: var(--font-family-serif);
   font-weight: 700;
@@ -295,6 +316,11 @@ textarea {
   border-radius: 0.75rem;
   padding: 0.7rem 0.9rem;
   color: var(--mv-forest);
+}
+
+.mv-input--icon {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
 }
 
 .mv-input:focus {
