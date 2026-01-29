@@ -175,6 +175,7 @@ const recipesIndex = allRecipes.map(recipe => ({
   slug: recipe.slug?.current || recipe._id,
   title: recipe.title,
   description: recipe.description,
+  image: recipe.featuredImageUrl ? `${recipe.featuredImageUrl}?w=400&h=300&fit=crop&auto=format` : null,
   category: normalizeCategoryValue(recipe.category),
   difficulty: recipe.difficulty,
   prepTime: recipe.prepTime || 0,
@@ -294,6 +295,119 @@ const formatPrice = (price?: number, currency?: string) => {
           </div>
         </div>
       ) : (
+        <!-- Recipes Coming Soon -->
+        <div class="text-center py-16 scroll-fade-in">
+          <div class="max-w-2xl mx-auto">
+            <svg class="mx-auto h-24 w-24 text-mv-forest-80 mb-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <h2 class="text-3xl font-serif font-bold text-mv-forest mb-4">
+              Recettes à venir
+            </h2>
+            <p class="text-lg text-mv-forest-80 mb-8">
+              Je prépare une collection de recettes saines et délicieuses pour vous accompagner dans votre voyage culinaire.
+            </p>
+          <div class="bg-mv-cream rounded-lg p-6 inline-block border border-mv-leaf-20">
+              <p class="text-mv-forest-80">
+                <strong>Prochainement :</strong> Recettes connectées au CMS pour une expérience interactive
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recipe Preview Cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+          <!-- Recipe Card 1 -->
+          <div class="mv-card overflow-hidden hover-lift click-feedback">
+            <div class="aspect-video bg-mv-cream flex items-center justify-center">
+              <div class="text-center text-mv-forest-60">
+                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <p class="text-sm">Photo recette</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
+                Salade d'été aux herbes
+              </h3>
+              <p class="text-mv-forest-80 mb-4">
+                Une salade fraîche et légère, parfaite pour les journées ensoleillées.
+              </p>
+              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
+                <span>⏱️ 15 min</span>
+                <span>👥 4 pers.</span>
+                <span>📊 Facile</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-cream text-mv-forest text-xs rounded-full">Rapide</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recipe Card 2 -->
+          <div class="mv-card overflow-hidden hover-lift click-feedback">
+            <div class="aspect-video bg-gray-200 flex items-center justify-center">
+              <div class="text-center text-mv-forest-60">
+                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <p class="text-sm">Photo recette</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
+                Soupe de légumes d'automne
+              </h3>
+              <p class="text-mv-forest-70 mb-4">
+                Un velouté réconfortant aux saveurs d'automne, riche en nutriments.
+              </p>
+              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
+                <span>⏱️ 45 min</span>
+                <span>👥 6 pers.</span>
+                <span>📊 Moyen</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-leaf text-white text-xs rounded-full">Thermomix</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recipe Card 3 -->
+          <div class="mv-card overflow-hidden hover-lift click-feedback">
+            <div class="aspect-video bg-gray-200 flex items-center justify-center">
+              <div class="text-center text-mv-forest-60">
+                <svg class="mx-auto h-12 w-12 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <p class="text-sm">Photo recette</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-serif font-bold text-mv-forest mb-2">
+                Quinoa aux légumes grillés
+              </h3>
+              <p class="text-mv-forest-70 mb-4">
+                Un plat complet et équilibré, source de protéines végétales.
+              </p>
+              <div class="flex items-center justify-between text-sm text-mv-forest-60 mb-4">
+                <span>⏱️ 30 min</span>
+                <span>👥 4 pers.</span>
+                <span>📊 Facile</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-1 bg-mv-forest text-white text-xs rounded-full">Végétarien</span>
+                <span class="px-2 py-1 bg-mv-cream text-mv-forest text-xs rounded-full">Rapide</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
++      <!-- Embeddez toujours un index JSON pour que le client puisse reconstruire l'UI si nécessaire -->
++      <script id="recipes-index" type="application/json">{JSON.stringify(recipesIndex)}</script>
         <!-- Recipes Coming Soon -->
         <div class="text-center py-16 scroll-fade-in">
           <div class="max-w-2xl mx-auto">
