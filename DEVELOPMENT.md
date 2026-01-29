@@ -9,7 +9,8 @@ Ce guide décrit les conventions et bonnes pratiques pour développer le site we
 ### Technologies
 
 - **Framework**: Astro 5.x
-- **Styling**: Tailwind CSS 4.x
+- **Styling**: Tailwind CSS 3.x (project uses Tailwind v3.4.x)
+  - Decision: use `tailwind.config.js` as the single source of truth (it uses CSS variables and extended shades). `tailwind.config.mjs` has been archived.
 - **CMS**: Sanity
 - **Déploiement**: Netlify
 
@@ -143,6 +144,48 @@ SANITY_PROJECT_ID=votre_project_id
 SANITY_DATASET=production
 SANITY_API_VERSION=2024-01-01
 ```
+
+### Secrets & rotation 🔒
+- Ne stockez jamais de tokens en clair dans le repo. Utilisez des variables d'environnement (ex: `SANITY_AUTH_TOKEN`) et un fichier local `.env` qui **ne doit pas** être commité.
+- Si une clé est exposée, **révoquez-la** immédiatement dans l'interface (Sanity / Stripe), générez une nouvelle clé, et purgez l'historique Git pour supprimer la valeur de l'historique (ex: `git filter-repo` ou `bfg`). Exemple rapide pour supprimer une valeur sensible :
+
+```bash
+# Revoke and generate new token in the provider.
+# Then locally, to remove a secret from history (example using git filter-repo):
+git clone --mirror <repo> repo.git
+cd repo.git
+git filter-repo --replace-text ../replacements.txt
+# where replacements.txt contains the token(s) to replace
+# push back (force) the cleaned history
+git push --force
+```
+
+Contacte-moi pour automatiser la purge en toute sécurité si tu veux.
+
+#### Accès premium (packs + paiements)
+
+```env
+# Stripe
+STRIPE_SECRET_KEY=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_SUCCESS_URL=https://votre-domaine/recettes?paiement=ok
+STRIPE_CANCEL_URL=https://votre-domaine/recettes?paiement=annule
+
+# Supabase
+SUPABASE_URL=https://xyzcompany.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=ey...
+SUPABASE_STORAGE_BUCKET=ebooks
+
+# Emails (Resend)
+RESEND_API_KEY=re_...
+ACCESS_EMAIL_FROM=\"Gastronomade <bonjour@gastronomade.fr>\"
+ACCESS_EMAIL_REPLY_TO=bonjour@gastronomade.fr
+
+# Site
+PUBLIC_SITE_URL=https://www.murielcruysmans.com
+```
+
+Appliquer le schéma SQL Supabase dans `supabase/schema.sql`.
 
 ### Sanity CMS
 

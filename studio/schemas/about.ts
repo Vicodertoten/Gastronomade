@@ -1,38 +1,41 @@
 // studio/schemas/about.ts
 export const about = {
   name: 'about',
-  title: 'À propos',
+  title: 'À propos — Cours & coaching',
   type: 'document',
   fields: [
     {
       name: 'title',
       title: 'Titre de la page',
       type: 'string',
-      initialValue: 'Cours & Coaching'
+      initialValue: 'Cours & Coaching - Muriel Cruysmans'
     },
     {
       name: 'heroTitle',
       title: 'Titre principal',
       type: 'string',
-      initialValue: 'Cours & Coaching'
+      initialValue: 'Cours & coaching personnalisés',
+      description: 'Titre du hero.'
     },
     {
       name: 'heroSubtitle',
       title: 'Sous-titre principal',
       type: 'text',
-      initialValue: 'Apprenez l\'art de la cuisine santé avec Muriel Cruysmans'
+      initialValue: 'Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien.',
+      description: '2 phrases max.'
     },
     {
       name: 'aboutTitle',
-      title: 'Titre section À propos',
+      title: 'Titre section Muriel',
       type: 'string',
-      initialValue: 'À propos de Muriel'
+      initialValue: 'Muriel, cuisine & transmission'
     },
     {
       name: 'bio',
-      title: 'Biographie',
+      title: 'Texte bio',
       type: 'text',
-      initialValue: 'Passionnée de cuisine santé et de bien-être, Muriel Cruysmans est une chef cuisinière diplômée qui met son expertise au service de votre alimentation.'
+      initialValue: 'Passionnée de cuisine santé et de bien‑être, Muriel Cruysmans transmet une approche simple, sensible et généreuse de l’alimentation. Elle aime cuisiner en quantité, partager et donner envie de mieux manger, sans rigidité.',
+      description: 'Paragraphe principal de la section Muriel.'
     },
     {
       name: 'photo',
@@ -122,15 +125,16 @@ export const about = {
     },
     {
       name: 'contactTitle',
-      title: 'Titre section contact',
+      title: 'Vision (page About) — Titre',
       type: 'string',
-      initialValue: 'Contactez Muriel'
+      initialValue: 'Ma vision de la cuisine'
     },
     {
       name: 'contactText',
-      title: 'Texte de contact',
+      title: 'Vision (page About) — Texte',
       type: 'text',
-      initialValue: 'Prête à commencer votre voyage culinaire ? Contactez Muriel pour réserver votre cours ou atelier.'
+      initialValue: 'Je crois à une cuisine simple, locale et profondément humaine — une cuisine qui nourrit le corps, apaise l’esprit et crée du lien.',
+      description: 'Court paragraphe de vision.'
     }
   ]
 }

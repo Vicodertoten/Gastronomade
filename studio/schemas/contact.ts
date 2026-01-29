@@ -8,7 +8,7 @@ export const contact = {
       name: 'title',
       title: 'Titre de la page',
       type: 'string',
-      initialValue: 'Contact - Gastronomade'
+      initialValue: 'Contact - Muriel Cruysmans'
     },
     {
       name: 'heroTitle',
@@ -20,7 +20,7 @@ export const contact = {
       name: 'heroSubtitle',
       title: 'Sous-titre',
       type: 'text',
-      initialValue: 'Prête à commencer votre voyage culinaire ? Contactez Muriel pour vos réservations et questions.'
+      initialValue: 'Une question, une envie de cours ou d’atelier ? Écrivez-moi, je vous réponds rapidement.'
     },
     {
       name: 'contactInfo',
@@ -31,19 +31,19 @@ export const contact = {
           name: 'phone',
           title: 'Téléphone',
           type: 'string',
-          initialValue: '+32 485 12 34 56'
+          initialValue: '+32 478 44 40 65'
         },
         {
           name: 'email',
           title: 'Email',
           type: 'string',
-          initialValue: 'muriel@gastronomade.be'
+          initialValue: 'muriel.cruysmans@gmail.com'
         },
         {
           name: 'address',
           title: 'Adresse',
           type: 'text',
-          initialValue: 'Rue de la Gastronomie 42\n1300 Wavre\nBelgique'
+          initialValue: 'Wavre\nBelgique'
         }
       ]
     },
@@ -76,14 +76,14 @@ export const contact = {
       }],
       initialValue: [
         {
-          platform: 'Facebook',
-          url: 'https://facebook.com/gastronomade',
-          label: 'Suivez-nous sur Facebook'
+          platform: 'Instagram',
+          url: 'https://www.instagram.com/manger_vrai',
+          label: 'Suivez Muriel sur Instagram'
         },
         {
-          platform: 'Instagram',
-          url: 'https://instagram.com/gastronomade',
-          label: 'Suivez-nous sur Instagram'
+          platform: 'YouTube',
+          url: 'https://www.youtube.com/@murielcruysmans5423/shorts',
+          label: 'Voir les vidéos YouTube'
         }
       ]
     },
@@ -102,13 +102,13 @@ export const contact = {
           name: 'text',
           title: 'Texte explicatif',
           type: 'text',
-          initialValue: 'Pour réserver vos cours, ateliers ou location d\'espace, contactez Muriel directement par téléphone ou email. Les réservations sont confirmées sous 48h avec versement d\'un acompte.'
+          initialValue: 'Pour réserver un cours, un atelier ou un coaching, contactez Muriel par téléphone ou email. Je reviens vers vous rapidement pour fixer une date.'
         },
         {
           name: 'depositInfo',
           title: 'Informations acompte',
           type: 'text',
-          initialValue: 'Un acompte de 25€ par personne est demandé pour confirmer votre réservation. Cet acompte est déduit du prix final.'
+          initialValue: 'Un acompte peut être demandé selon la formule choisie.'
         }
       ]
     }

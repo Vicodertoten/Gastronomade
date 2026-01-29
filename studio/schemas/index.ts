@@ -8,6 +8,7 @@ import { contact } from './contact'
 import { home } from './home'
 import { newsletter } from './newsletter'
 import { companyAgenda } from './companyAgenda'
+import { pack } from './pack'
 
 export const schemaTypes = [
   restaurant,
@@ -18,5 +19,6 @@ export const schemaTypes = [
   contact,
   home,
   companyAgenda,
-  newsletter
+  newsletter,
+  pack
 ]

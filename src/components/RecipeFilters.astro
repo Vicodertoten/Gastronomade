@@ -746,6 +746,16 @@ const {
     });
   };
 
+  window.addEventListener('recipesIndexUpdated', (event) => {
+    const updated = event?.detail?.recipes;
+    if (!Array.isArray(updated)) return;
+    window.recipeIndex = updated;
+    recipeIndex = buildRecipeIndex(updated);
+    const cards = document.querySelectorAll('[data-recipe-card]');
+    cardsById = new Map(Array.from(cards).map((card) => [card.dataset.recipeId, card]));
+    applyFilters();
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
     applyURLFilters();
 

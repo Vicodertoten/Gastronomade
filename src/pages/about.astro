@@ -23,33 +23,70 @@ function getImageUrl(image: any): string | null {
 const aboutData = await sanityClient.fetch<AboutData>(queries.about);
 ---
 
-<MainLayout title={aboutData?.title || "Cours & Coaching - Gastronomade"}>
+<MainLayout title={aboutData?.title || "Cours & Coaching - Muriel Cruysmans"}>
   <!-- Hero Section -->
-  <section class="relative overflow-visible bg-mv-cream mv-section">
-    <div class="relative mv-container">
+  <section class="relative z-0 overflow-visible bg-mv-cream mv-section">
+    <div class="relative z-0 mv-container">
       <img
         src="/images/logo-manger-vrai.png"
         alt="Logo Manger Vrai"
-        class="absolute w-64 sm:w-72 lg:w-70 z-0 pointer-events-none opacity-90"
-        style="top: -30%; right: 0%;"
+        class="absolute w-64 sm:w-72 lg:w-70 z-[60] pointer-events-none opacity-90"
+        style="top: -20%; right: 0%;"
         loading="lazy"
       />
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        <div class="lg:col-span-7 space-y-4 relative z-20">
+        <div class="lg:col-span-7 space-y-4 relative z-10">
           <h1 class="mv-hero-title">
-            {aboutData?.heroTitle || "Cours & Coaching"}
+            {aboutData?.heroTitle || "Cours & coaching personnalisés"}
           </h1>
           <p class="mv-hero-subtitle text-mv-forest-80">
-            {aboutData?.heroSubtitle || "Apprenez l'art de la cuisine santé avec Muriel Cruysmans"}
+            {aboutData?.heroSubtitle || "Une cuisine saine, vivante et joyeuse, pour apprendre à cuisiner simplement et mieux manger au quotidien."}
           </p>
           <div class="flex flex-wrap gap-3 pt-2">
             <a href="/contact" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
-              Me contacter
+              Mes services
             </a>
-            <a href="#services" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
-              Voir les services
-            </a>
+           
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vision Section -->
+  <section id="vision" class="mv-section bg-white">
+    <div class="mv-container max-w-5xl">
+      <div class="max-w-3xl">
+        <p class="mv-kicker">Vision</p>
+        <h2 class="mv-section-title">
+          {aboutData?.contactTitle || "Ma vision de la cuisine"}
+        </h2>
+        <p class="mv-lead text-mv-forest-70">
+          {aboutData?.contactText || "Je crois à une cuisine simple, locale et profondément humaine — une cuisine qui nourrit le corps, apaise l’esprit et crée du lien."}
+        </p>
+      </div>
+
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div class="mv-card p-5 sm:p-6">
+          <p class="text-xs uppercase tracking-[0.3em] text-mv-forest-50">Santé</p>
+          <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">Équilibre & vitalité</h3>
+          <p class="mt-2 text-sm text-mv-forest-70">
+            Des recettes accessibles, bonnes et saines, pour retrouver énergie et plaisir sans pression.
+          </p>
+        </div>
+        <div class="mv-card p-5 sm:p-6">
+          <p class="text-xs uppercase tracking-[0.3em] text-mv-forest-50">Transmission</p>
+          <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">Apprendre en faisant</h3>
+          <p class="mt-2 text-sm text-mv-forest-70">
+            Des gestes simples, des repères clairs, pour gagner en autonomie et en confiance.
+          </p>
+        </div>
+        <div class="mv-card p-5 sm:p-6">
+          <p class="text-xs uppercase tracking-[0.3em] text-mv-forest-50">Plaisir</p>
+          <h3 class="mt-2 text-lg font-serif font-semibold text-mv-forest">Cuisine vivante</h3>
+          <p class="mt-2 text-sm text-mv-forest-70">
+            Végétal, saison, gourmandise : une cuisine qui fait du bien et qui rassemble.
+          </p>
         </div>
       </div>
     </div>
@@ -60,7 +97,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
     <div class="mv-container max-w-6xl">
       <div class="text-center mb-6 sm:mb-8 lg:mb-10">
         <h2 class="mv-section-title mb-3 sm:mb-4">
-          {aboutData?.aboutTitle || "À propos de Muriel"}
+          {aboutData?.aboutTitle || "Muriel, cuisine & transmission"}
         </h2>
       </div>
 
@@ -68,7 +105,7 @@ const aboutData = await sanityClient.fetch<AboutData>(queries.about);
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
           <div class="space-y-4 sm:space-y-6 order-2 lg:order-1">
             <p class="text-base sm:text-lg text-mv-forest-80 leading-relaxed">
-              {aboutData?.bio || "Passionnée de cuisine santé et de bien-être, Muriel Cruysmans est une chef cuisinière diplômée qui met son expertise au service de votre alimentation."}
+              {aboutData?.bio || "Passionnée de cuisine santé et de bien‑être, Muriel Cruysmans transmet une approche simple, sensible et généreuse de l’alimentation. Elle aime cuisiner en quantité, partager et donner envie de mieux manger, sans rigidité."}
             </p>
             <div class="space-y-3 sm:space-y-4">
               {aboutData?.achievements ? aboutData.achievements.map((achievement, index) => (

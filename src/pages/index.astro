@@ -48,34 +48,6 @@ const companyAgenda = await sanityClient.fetch<CompanyAgendaData>(queries.compan
 const societeLocations = locations.filter(loc => loc.type === 'societe');
 const priveLocations = locations.filter(loc => loc.type === 'prive');
 
-const fallbackSocieteFeatures = [
-  "Cadre inspirant et chaleureux",
-  "Cuisine entièrement équipée",
-  "Parking privé",
-  "Accès facile via E411",
-  "Espace modulable selon vos besoins",
-  "Calendrier de disponibilité"
-];
-
-const fallbackPriveFeatures = [
-  "Anniversaires et célébrations",
-  "Réunions de famille",
-  "Dîners entre amis",
-  "Espace privatif et cosy",
-  "Service personnalisé"
-];
-
-const fallbackRestaurantFeatures = [
-  "Menu unique du chef",
-  "Réservation minimum 4 personnes",
-  "Acompte de 25€ par personne",
-  "Ambiance conviviale",
-  "Produits frais et locaux"
-];
-
-const societeFeatures = societeLocations[0]?.features?.length ? societeLocations[0].features : fallbackSocieteFeatures;
-const priveFeatures = priveLocations[0]?.features?.length ? priveLocations[0].features : fallbackPriveFeatures;
-
 const agendaSlots = (companyAgenda?.slots && companyAgenda.slots.length > 0 ? companyAgenda.slots : fallbackAgendaSlots)
   .slice()
   .sort((a, b) => {
@@ -249,13 +221,6 @@ const formatRestaurantDay = (value?: string) => {
 }
 
 const restaurantStatus = restaurantData?.isFull ? 'Réservé' : 'Disponible'
-const restaurantFeatures = [
-  restaurantData?.menuDescription || fallbackRestaurantFeatures[0],
-  `Réservation minimum ${restaurantData?.minGuests || 4} personnes`,
-  `Acompte de ${restaurantData?.depositAmount || 25}€ par personne`,
-  fallbackRestaurantFeatures[3],
-  fallbackRestaurantFeatures[4]
-]
 const restaurantSlots = (restaurantData?.dates && restaurantData.dates.length > 0 ? restaurantData.dates : fallbackRestaurantDates)
   .slice(0, 8)
   .map(date => ({
@@ -266,9 +231,12 @@ const restaurantSlots = (restaurantData?.dates && restaurantData.dates.length > 
   }))
 
 const heroBackgroundUrl = homeData?.heroBackgroundImage?.asset?.url
-const mergedLocationFeatures = Array.from(
-  new Set([...(societeFeatures || []), ...(priveFeatures || []), ...(restaurantFeatures || [])].filter(Boolean))
-).slice(0, 4)
+const locationGallery = (homeData?.locationGallery || []).filter((image) => image?.url)
+const whyHereItems = [
+  "En pleine nature, à 1 km de la E411",
+  "Maison en bois, chauffée au poêle",
+  "Jusqu’à 14 personnes, terrasse et parking facile"
+]
 ---
 
 <MainLayout title={homeData?.title || "Gastronomade - Manger Vrai | Muriel Cruysmans"}>
@@ -290,19 +258,16 @@ const mergedLocationFeatures = Array.from(
     <div class="relative z-10 mv-container">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         <div class="lg:col-span-7 space-y-5 sm:space-y-6">
-          <p class="mv-kicker">Le restaurant</p>
+          <p class="mv-kicker">{homeData?.heroSubtitle || 'Gastronomade'}</p>
           <h1 class="mv-hero-title max-w-3xl">
-            {homeData?.heroTitle || "Gastronomade"}
+            {homeData?.heroTitle || 'Un lieu d’exception pour vos rencontres.'}
           </h1>
-          <p class="mv-hero-subtitle max-w-3xl">
-            {homeData?.heroSubtitle || "Découvrez l'art de manger vrai avec Muriel Cruysmans à Wavre"}
-          </p>
-          <p class="mv-lead max-w-2xl text-mv-forest-90">
-            {homeData?.heroDescription || "Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands"}
+          <p class="mv-hero-subtitle max-w-3xl text-mv-forest-80">
+            {homeData?.heroDescription || "À Wavre, à 1 km de la E411, Gastronomade accueille réunions, événements privés et dîners. Un cadre naturel, chaleureux et simple d’accès."}
           </p>
           <div class="flex flex-wrap gap-3 pt-2">
             <a href="/contact" class="mv-btn mv-btn-primary bg-mv-forest text-mv-cream hover:bg-mv-leaf">
-              Réserver un créneau
+              Demander un créneau
             </a>
             <a href="#location-section" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
               Découvrir le lieu
@@ -316,33 +281,14 @@ const mergedLocationFeatures = Array.from(
   <!-- Gastronomade Section -->
   <section class="mv-section bg-white fade-in-up scroll-fade-in" id="location-section">
     <div class="mv-container">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        <div class="lg:col-span-5 space-y-4">
-          <p class="mv-kicker">Lieu & événements</p>
-          <h2 class="mv-section-title">
-            {homeData?.locationSectionTitle || 'Location de l\'Espace "La Zboum"'}
-          </h2>
-          <p class="mv-lead text-mv-forest-80">
-            {homeData?.locationSectionDescription || "Un cadre inspirant pour vos réunions d'entreprise, événements privés et soirées gourmandes"}
-          </p>
-          <a href="/contact" class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream">
-            Demander les disponibilités
-          </a>
-        </div>
-        <div class="lg:col-span-7">
-          <div class="rounded-3xl border border-mv-leaf-20 bg-mv-cream-80 p-6">
-            <p class="text-xs uppercase tracking-[0.25em] text-mv-forest-60 mb-4">Inclus dans toutes les options</p>
-            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-mv-forest-80">
-              {mergedLocationFeatures.map((feature) => (
-                <li class="flex items-start gap-2">
-                  <span class="mt-1 h-1.5 w-1.5 rounded-full bg-mv-leaf" aria-hidden="true"></span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <p class="mt-3 text-xs text-mv-forest-60">Et plus encore selon l’option choisie.</p>
-          </div>
-        </div>
+      <div class="max-w-3xl">
+        <p class="mv-kicker">Deux expériences</p>
+        <h2 class="mv-section-title">
+          {homeData?.locationSectionTitle || 'Privatisation & restaurant éphémère'}
+        </h2>
+        <p class="mv-lead text-mv-forest-70">
+          {homeData?.locationSectionDescription || 'Deux offres complémentaires, un même esprit : chaleur, nature et cuisine sincère.'}
+        </p>
       </div>
 
       <div class="relative mt-10">
@@ -361,7 +307,7 @@ const mergedLocationFeatures = Array.from(
                 features={[]}
                 imageUrl={societeLocations[0].imageUrl ? `${societeLocations[0].imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
                 imageAlt={societeLocations[0].title}
-                ctaText="Réserver pour mon équipe"
+                ctaText="Découvrir la privatisation"
                 ctaLink="/contact"
               />
             ) : (
@@ -371,7 +317,7 @@ const mergedLocationFeatures = Array.from(
                 price="400€"
                 period="HTVA"
                 features={[]}
-                ctaText="Réserver pour mon équipe"
+                ctaText="Découvrir la privatisation"
                 ctaLink="/contact"
               />
             )}
@@ -382,7 +328,7 @@ const mergedLocationFeatures = Array.from(
             {priveLocations.length > 0 ? (
               <PricingCard
                 title={priveLocations[0].title}
-                subtitle={priveLocations[0].subtitle || "Événements personnels"}
+                subtitle={priveLocations[0].subtitle || "Événements privés"}
                 price={priveLocations[0].price}
                 period="HTVA"
                 features={[]}
@@ -394,7 +340,7 @@ const mergedLocationFeatures = Array.from(
             ) : (
               <PricingCard
                 title="Privé"
-                subtitle="Événements personnels"
+                subtitle="Événements privés"
                 price="400€"
                 period="HTVA"
                 features={[]}
@@ -407,16 +353,70 @@ const mergedLocationFeatures = Array.from(
           <!-- Restaurant -->
           <div class="scroll-slide-in-right">
             <PricingCard
-              title="Restaurant"
-              subtitle={restaurantData?.subtitle || "Un jeudi soir par mois"}
+              title={restaurantData?.title || "Restaurant éphémère"}
+              subtitle={restaurantData?.subtitle || "Un jeudi par mois"}
               price={restaurantData?.price ? `${restaurantData.price}€` : "50€"}
               period="/pers."
               features={[]}
-              ctaText="Réserver une table"
+              ctaText="Voir les prochaines dates"
               ctaLink="#restaurant-section"
+              imageUrl={restaurantData?.imageUrl ? `${restaurantData.imageUrl}?w=600&h=400&fit=crop&auto=format` : undefined}
+              imageAlt={restaurantData?.imageAlt || restaurantData?.title || "Restaurant éphémère"}
               highlight="true"
             />
           </div>
+        </div>
+      </div>
+
+      {locationGallery.length > 0 && (
+        <div class="mt-10">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
+            <div>
+              <p class="mv-kicker">Le lieu en images</p>
+              <h3 class="text-xl sm:text-2xl font-serif font-semibold text-mv-forest">
+                Découvrez l’atmosphère
+              </h3>
+            </div>
+            <p class="text-sm text-mv-forest-60 max-w-lg">
+              Lumière naturelle, table conviviale, coins cosy et espaces modulables.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {locationGallery.slice(0, 6).map((image, index) => (
+              <figure
+                class={`group relative overflow-hidden rounded-2xl border border-mv-leaf-20 bg-mv-cream-80 ${index === 0 ? 'sm:col-span-2 lg:col-span-2' : ''}`}
+              >
+                <img
+                  src={`${image.url}?w=900&h=600&fit=crop&auto=format`}
+                  alt={image.alt || 'Photo du lieu'}
+                  class="h-56 sm:h-64 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-mv-cream/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {image.alt && (
+                  <figcaption class="absolute bottom-3 left-3 rounded-full bg-mv-cream-80 px-3 py-1 text-[0.7rem] uppercase tracking-[0.2em] text-mv-forest-70">
+                    {image.alt}
+                  </figcaption>
+                )}
+              </figure>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div class="mt-8 max-w-3xl">
+        <div class="rounded-2xl border border-mv-leaf-10 bg-white/70 px-4 py-3">
+          <p class="text-[0.6rem] uppercase tracking-[0.32em] text-mv-forest-50 mb-2">
+            Pourquoi ici ?
+          </p>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-mv-forest-70">
+            {whyHereItems.map((feature) => (
+              <li class="flex items-start gap-2">
+                <span class="mt-1 h-1 w-1 rounded-full bg-mv-leaf/60" aria-hidden="true"></span>
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
@@ -425,24 +425,17 @@ const mergedLocationFeatures = Array.from(
   <!-- Restaurant Section -->
   <section id="restaurant-section" class="mv-section bg-gradient-to-b from-mv-cream to-white scroll-fade-in">
     <div class="mv-container">
-      <div class="text-center mb-8">
-        <h2 class="mv-section-title mb-3">
-          {homeData?.restaurantSectionTitle || 'Restaurant Gastronomade'}
-        </h2>
-        <p class="mv-lead text-mv-plum max-w-2xl mx-auto">
-          {homeData?.restaurantSectionDescription || "Découvrez notre carte saisonnière et nos événements culinaires"}
-        </p>
-      </div>
+      
 
       <div class="max-w-5xl mx-auto">
         <div class="bg-white rounded-3xl border border-mv-leaf-20 p-8 shadow-xl">
           <div class="grid gap-8 lg:grid-cols-[1.2fr,0.8fr]">
             <div>
               <h3 class="text-2xl font-serif font-bold text-mv-forest mb-4">
-                {restaurantData?.menuTitle || 'Menu du Chef'}
+                {restaurantData?.menuTitle || 'Menu végétal & sauvage'}
               </h3>
               <p class="text-mv-forest-80 mb-4">
-                {restaurantData?.menuDescription || 'Un menu unique, imaginé pour des soirées conviviales autour de produits de saison.'}
+                {restaurantData?.menuDescription || 'Un menu unique, imaginé pour des soirées conviviales autour de produits locaux et de saison.'}
               </p>
               <div class="space-y-3 text-sm text-mv-forest-90">
                 <p class="font-semibold text-mv-forest">
@@ -477,7 +470,7 @@ const mergedLocationFeatures = Array.from(
               href="/contact"
               class="mv-btn mv-btn-primary bg-mv-forest text-white text-[0.85rem] uppercase tracking-[0.3em] shadow-lg hover:bg-mv-plum transition"
             >
-              Réserver un créneau
+              Réserver une table
             </a>
           </div>
         </div>
@@ -494,6 +487,9 @@ const mergedLocationFeatures = Array.from(
           <h2 class="mv-section-title">
             {companyAgenda?.calendarTitle || "Disponibilités entreprises"}
           </h2>
+          <p class="mt-2 text-sm text-mv-forest-70">
+            Planifiez votre journée d’équipe dans un lieu qui respire.
+          </p>
         </div>
         <div class="flex flex-col items-start gap-2">
           <a
@@ -606,5 +602,28 @@ const mergedLocationFeatures = Array.from(
         update(0)
       })()
     </script>
+  </section>
+
+  <section class="mv-section bg-white scroll-fade-in">
+    <div class="mv-container">
+      <div class="max-w-3xl">
+        <p class="mv-kicker">À propos</p>
+        <h2 class="mv-section-title">
+          {homeData?.ctaTitle || 'L’histoire de Gastronomade'}
+        </h2>
+        <p class="mv-lead text-mv-forest-70">
+          {homeData?.ctaDescription || 'Gastronomade est né d’un rêve de famille. Muriel y partage sa cuisine végétale et son goût du vivant, dans un lieu chaleureux en pleine nature.'}
+        </p>
+      </div>
+
+      <div class="mt-6">
+        <a
+          href="/about"
+          class="mv-btn mv-btn-secondary border-mv-forest text-mv-forest hover:bg-mv-forest hover:text-mv-cream"
+        >
+          {homeData?.ctaPrimaryButton || 'Découvrir notre histoire'}
+        </a>
+      </div>
+    </div>
   </section>
 </MainLayout>

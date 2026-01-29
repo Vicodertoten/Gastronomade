@@ -1,12 +1,12 @@
 // schemas/location.ts
 export const location = {
   name: 'location',
-  title: 'Locations (La Zboum)',
+  title: 'Privatisation du lieu',
   type: 'document',
   fields: [
     {
       name: 'type',
-      title: 'Type de location',
+      title: 'Type d’offre',
       type: 'string',
       options: {
         list: [
@@ -14,19 +14,19 @@ export const location = {
           { title: 'Privé', value: 'prive' }
         ]
       },
-      description: 'Choisissez le type d\'événement'
+      description: 'Choisissez la catégorie de l’offre.'
     },
     {
       name: 'title',
-      title: 'Titre de l\'offre',
+      title: 'Titre de l’offre',
       type: 'string',
-      description: 'Ex: "Réunions d\'entreprise" ou "Événements privés"'
+      description: 'Ex: "Réunions d’équipe" ou "Événements privés".'
     },
     {
       name: 'subtitle',
       title: 'Sous-titre',
       type: 'string',
-      description: 'Ex: "Réunions & Team-Buildings" ou "Événements personnels"'
+      description: 'Texte court sous le titre.'
     },
     {
       name: 'price',
@@ -37,10 +37,10 @@ export const location = {
     },
     {
       name: 'features',
-      title: 'Points forts',
+      title: 'Points forts (optionnel)',
       type: 'array',
       of: [{ type: 'string' }],
-      description: 'Liste des avantages et équipements disponibles',
+      description: 'Liste des avantages et équipements. Peut rester vide.',
       initialValue: [
         'Cadre inspirant et chaleureux',
         'Cuisine entièrement équipée',
@@ -52,7 +52,7 @@ export const location = {
       name: 'description',
       title: 'Description détaillée',
       type: 'text',
-      description: 'Description complète de l\'offre de location'
+      description: 'Texte plus long pour la page de détails.'
     },
     {
       name: 'maxCapacity',

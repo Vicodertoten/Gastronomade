@@ -17,17 +17,29 @@ export default defineConfig({
         S.list()
           .title('Administration')
           .items([
-            // Contenu principal
+            // Pages
             S.listItem()
-              .title('Contenu du site')
+              .title('Pages')
               .child(
                 S.list()
-                  .title('Contenu du site')
+                  .title('Pages du site')
                   .items([
-                    S.listItem().title('Accueil').child(S.document().schemaType('home').documentId('home')),
-                    S.listItem().title('À propos').child(S.document().schemaType('about').documentId('about')),
+                    S.listItem().title('Accueil — Gastronomade').child(S.document().schemaType('home').documentId('home')),
+                    S.listItem().title('À propos — Cours & coaching').child(S.document().schemaType('about').documentId('about')),
                     S.listItem().title('Thermomix').child(S.document().schemaType('thermomix').documentId('thermomix')),
                     S.listItem().title('Contact').child(S.document().schemaType('contact').documentId('contact')),
+                  ])
+              ),
+
+            // Offres & lieu
+            S.listItem()
+              .title('Offres & lieu')
+              .child(
+                S.list()
+                  .title('Offres & lieu')
+                  .items([
+                    S.listItem().title('Privatisation du lieu').child(S.documentTypeList('location').title('Offres de privatisation')),
+                    S.listItem().title('Restaurant éphémère').child(S.documentTypeList('restaurant').title('Soirées & menus')),
                     S.listItem()
                       .title('Agenda entreprises')
                       .child(S.document().schemaType('companyAgenda').documentId('companyAgenda')),
@@ -39,15 +51,10 @@ export default defineConfig({
               .title('Recettes')
               .child(S.documentTypeList('recipe').title('Toutes les recettes')),
 
-            // Locations
+            // Boutique
             S.listItem()
-              .title('Locations')
-              .child(S.documentTypeList('location').title('Toutes les locations')),
-
-            // Restaurant
-            S.listItem()
-              .title('Restaurant')
-              .child(S.documentTypeList('restaurant').title('Événements restaurant')),
+              .title('Boutique')
+              .child(S.documentTypeList('pack').title('Packs')),
 
             // Newsletter Tool
             S.listItem()

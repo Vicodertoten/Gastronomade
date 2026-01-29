@@ -8,11 +8,22 @@ from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-# --- CONFIGURATION ---
-PROJECT_ID = "gjz41m8i"
-DATASET = "production"
-TOKEN = "skcJz0WGRUbi7a6MSloep6Onb9lk4AnM73aGjuG3TRAOBHM9mVVCvP68QZ5sZVfnNYY1TT9ZYJveyMygI76BvTe71jkHMyx7ISzTSyaOzYJjDKzofIeLekLm8Up0YJehJDbGDp6vYIzZpY3zxp2vT6feQQiCBxqUAriGykXVqYwYfhCRd16R"
-API_VERSION = "v2021-06-07"
+# Load .env locally if python-dotenv is installed (optional)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
+
+# --- CONFIGURATION (use environment variables; do NOT commit tokens) ---
+# Set these in your shell or a local .env (see .env.example)
+PROJECT_ID = os.getenv("SANITY_PROJECT_ID", "")
+DATASET = os.getenv("SANITY_DATASET", "production")
+TOKEN = os.getenv("SANITY_AUTH_TOKEN", "")
+API_VERSION = os.getenv("SANITY_API_VERSION", "v2021-06-07")
+
+if not PROJECT_ID or not TOKEN:
+    raise RuntimeError("SANITY_PROJECT_ID and SANITY_AUTH_TOKEN are required in the environment. Do not commit tokens; rotate compromised tokens immediately.")
 
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 BASE_URL = f"https://{PROJECT_ID}.api.sanity.io/{API_VERSION}"

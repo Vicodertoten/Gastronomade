@@ -1,42 +1,55 @@
 // schemas/restaurant.ts
 export const restaurant = {
   name: 'restaurant',
-  title: 'Restaurant Éphémère',
+  title: 'Restaurant éphémère',
   type: 'document',
   fields: [
     {
       name: 'title',
-      title: 'Titre de la soirée',
+      title: 'Titre (optionnel)',
       type: 'string',
-      description: 'Ex: "Soirée Gastronomique d\'Hiver"'
+      description: 'Ex: "Soirée d’hiver" ou laissez vide.'
     },
     {
       name: 'subtitle',
       title: 'Sous-titre',
       type: 'string',
-      initialValue: 'Un jeudi soir par mois',
-      description: 'Ex: "Un jeudi soir par mois"'
+      initialValue: 'Un jeudi par mois',
+      description: 'Texte court sous le titre.'
+    },
+    {
+      name: 'image',
+      title: 'Image de la carte',
+      type: 'image',
+      options: { hotspot: true },
+      description: 'Image affichée sur la carte Restaurant de la homepage.'
+    },
+    {
+      name: 'imageAlt',
+      title: 'Texte alternatif (image)',
+      type: 'string',
+      description: 'Décrivez l’image pour l’accessibilité.'
     },
     {
       name: 'menuTitle',
       title: 'Titre de la section menu',
       type: 'string',
-      initialValue: 'Menu du Chef',
+      initialValue: 'Menu végétal & sauvage',
       description: 'Titre de la section menu'
     },
     {
       name: 'datesTitle',
       title: 'Titre de la section dates',
       type: 'string',
-      initialValue: 'Prochaines Dates',
+      initialValue: 'Prochaines dates',
       description: 'Titre de la section dates'
     },
     {
       name: 'reservationTitle',
       title: 'Titre de la section réservation',
       type: 'string',
-      initialValue: 'Réserver votre soirée',
-      description: 'Titre de la section réservation'
+      initialValue: 'Prochaines soirées',
+      description: 'Titre au-dessus des dates.'
     },
     {
       name: 'dates',
@@ -56,7 +69,8 @@ export const restaurant = {
       name: 'menuDescription',
       title: 'Description du menu',
       type: 'text',
-      description: 'Décrivez le menu unique de la soirée'
+      description: 'Décrivez le menu unique de la soirée',
+      initialValue: 'Un menu unique, créatif et très végétal, cuisiné au rythme des saisons.'
     },
     {
       name: 'isFull',

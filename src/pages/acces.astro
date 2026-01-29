@@ -1,0 +1,48 @@
+---
+export const prerender = false;
+
+import MainLayout from '../layouts/MainLayout.astro';
+import { ACCESS_SESSION_COOKIE, consumeAccessToken, createSession } from '../lib/server/access';
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || import.meta.env.SITE_URL || Astro.url.origin;
+const isSecure = siteUrl.startsWith('https://');
+const token = Astro.url.searchParams.get('token');
+
+let status: 'missing' | 'invalid' | 'success' = 'missing';
+
+if (token) {
+  const email = await consumeAccessToken(token);
+  if (email) {
+    const sessionToken = await createSession(email);
+    Astro.cookies.set(ACCESS_SESSION_COOKIE, sessionToken, {
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365
+    });
+    status = 'success';
+  } else {
+    status = 'invalid';
+  }
+}
+
+if (status === 'success') {
+  return Astro.redirect('/recettes?acces=ok');
+}
+---
+
+<MainLayout title="Accès - Gastronomade">
+  <section class="py-16 bg-white">
+    <div class="mv-container max-w-xl text-center">
+      <h1 class="text-3xl font-serif font-bold text-mv-forest mb-4">Accès premium</h1>
+      {status === 'missing' && (
+        <p class="text-mv-forest-70">Lien d'accès manquant. Vérifie le lien reçu par email.</p>
+      )}
+      {status === 'invalid' && (
+        <p class="text-mv-forest-70">Ce lien n'est plus valide. Tu peux demander un nouveau lien depuis la page recettes.</p>
+      )}
+      <a href="/recettes" class="mv-btn mt-6 inline-flex">Retour aux recettes</a>
+    </div>
+  </section>
+</MainLayout>

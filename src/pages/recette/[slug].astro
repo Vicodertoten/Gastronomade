@@ -3,30 +3,36 @@ import MainLayout from '../../layouts/MainLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ShoppingList from '../../components/ShoppingList.astro';
 import FavoritesManager from '../../components/FavoritesManager.astro';
-import type { RecipeData } from '../../lib/sanity';
+import { getRecipeBySlug } from '../../lib/sanity';
+import { getEntitledPackIds, getSessionEmail, getSessionTokenFromRequest } from '../../lib/server/access';
 
-export async function getStaticPaths() {
-  const { getRecipesData } = await import('../../lib/sanity');
-  const recipes = await getRecipesData();
+export const prerender = false;
 
-  return recipes.map((recipe) => {
-    const slug = recipe.slug?.current || recipe._id;
-    return {
-      params: {
-        slug: slug
-      },
-      props: {
-        recipe
-      }
-    };
-  });
-}
-
-const { recipe } = Astro.props as { recipe: RecipeData };
+const slug = Astro.params.slug;
+const recipe = slug ? await getRecipeBySlug(slug) : null;
 
 // Si la recette n'existe pas, afficher une page 404
 if (!recipe) {
-  return Astro.redirect('/404');
+  return new Response(null, { status: 404 });
+}
+
+const packIds = recipe.packIds || [];
+if (packIds.length > 0) {
+  const sessionToken = getSessionTokenFromRequest(Astro.request);
+  if (!sessionToken) {
+    return new Response(null, { status: 404 });
+  }
+
+  const email = await getSessionEmail(sessionToken);
+  if (!email) {
+    return new Response(null, { status: 404 });
+  }
+
+  const entitledPackIds = await getEntitledPackIds(email);
+  const hasAccess = packIds.some((packId) => entitledPackIds.includes(packId));
+  if (!hasAccess) {
+    return new Response(null, { status: 404 });
+  }
 }
 
 // Fonction pour obtenir le nom de la catégorie

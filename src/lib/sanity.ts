@@ -22,6 +22,9 @@ export interface RestaurantData {
   _id: string
   title: string
   subtitle: string
+  image?: any
+  imageUrl?: string
+  imageAlt?: string
   menuTitle: string
   datesTitle: string
   reservationTitle: string
@@ -114,10 +117,28 @@ export interface RecipeData {
     fiber?: number
   }
   isPremium: boolean
+  packIds?: string[]
   publishedAt: string
   rating?: number
   isNew?: boolean
   isPopular?: boolean
+}
+
+
+export interface PackData {
+  _id: string
+  title: string
+  slug?: { current: string }
+  description?: string
+  price?: number
+  currency?: string
+  stripePriceId?: string
+  coverImage?: any
+  coverImageUrl?: string
+  ebookKey?: string
+  recipeIds?: string[]
+  recipeCount?: number
+  isActive?: boolean
 }
 
 export interface AboutData {
@@ -152,6 +173,10 @@ export interface HomeData {
   }
   locationSectionTitle: string
   locationSectionDescription: string
+  locationGallery?: Array<{
+    url?: string
+    alt?: string
+  }>
   restaurantSectionTitle: string
   restaurantSectionDescription: string
   ctaTitle: string
@@ -199,6 +224,9 @@ export const queries = {
     _id,
     title,
     subtitle,
+    image,
+    "imageUrl": image.asset->url,
+    imageAlt,
     menuTitle,
     datesTitle,
     reservationTitle,
@@ -252,8 +280,8 @@ export const queries = {
     }
   }`,
 
-  // Recettes - Toutes les recettes publiques
-  recipes: `*[_type == "recipe" && isPremium == false] | order(publishedAt desc) {
+  // Recettes - Toutes les recettes gratuites (hors packs)
+  recipes: `*[_type == "recipe" && !(_id in *[_type == "pack" && isActive == true].recipes[]._ref)] | order(publishedAt desc) {
     _id,
     title,
     slug,
@@ -289,7 +317,95 @@ export const queries = {
   }`,
 
   // Recette spécifique par slug
-  recipeBySlug: (slug: string) => `*[_type == "recipe" && slug.current == "${slug}"][0] {
+  recipeBySlug: `*[_type == "recipe" && slug.current == $slug][0] {
+    _id,
+    title,
+    slug,
+    category,
+    subtitle,
+    description,
+    featuredImage,
+    "featuredImageUrl": featuredImage.asset->url,
+    gallery[]{ ..., "url": asset->url },
+    prepTime,
+    cookTime,
+    restTime,
+    servings,
+    difficulty,
+    budget,
+    ingredients,
+    instructions,
+    highlights,
+    tips,
+    variations,
+    tags,
+    diet,
+    season,
+    equipment,
+    allergens,
+    storage,
+    nutrition,
+    isPremium,
+    publishedAt,
+    rating,
+    isNew,
+    isPopular,
+    "packIds": *[_type == "pack" && isActive == true && references(^._id)]._id
+  }`,
+
+  // Recettes par catégorie
+  recipesByCategory: `*[_type == "recipe" && category == $category && !(_id in *[_type == "pack" && isActive == true].recipes[]._ref)] | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    description,
+    featuredImage,
+    "featuredImageUrl": featuredImage.asset->url,
+    prepTime,
+    cookTime,
+    restTime,
+    difficulty,
+    tags,
+    diet,
+    season,
+    budget
+  }`,
+
+
+  // Packs - Boutique
+  packs: `*[_type == "pack" && isActive == true] | order(_createdAt desc) {
+    _id,
+    title,
+    slug,
+    description,
+    price,
+    currency,
+    stripePriceId,
+    coverImage,
+    "coverImageUrl": coverImage.asset->url,
+    ebookKey,
+    "recipeIds": recipes[]._ref,
+    "recipeCount": count(recipes),
+    isActive
+  }`,
+
+  packById: `*[_type == "pack" && _id == $id][0] {
+    _id,
+    title,
+    slug,
+    description,
+    price,
+    currency,
+    stripePriceId,
+    coverImage,
+    "coverImageUrl": coverImage.asset->url,
+    ebookKey,
+    "recipeIds": recipes[]._ref,
+    "recipeCount": count(recipes),
+    isActive
+  }`,
+
+  recipesByPackIds: `*[_type == "recipe" && _id in *[_type == "pack" && _id in $packIds].recipes[]._ref] | order(publishedAt desc) {
     _id,
     title,
     slug,
@@ -322,24 +438,6 @@ export const queries = {
     rating,
     isNew,
     isPopular
-  }`,
-
-  // Recettes par catégorie
-  recipesByCategory: (category: string) => `*[_type == "recipe" && category == "${category}" && isPremium == false] | order(publishedAt desc) {
-    _id,
-    title,
-    slug,
-    description,
-    featuredImage,
-    "featuredImageUrl": featuredImage.asset->url,
-    prepTime,
-    cookTime,
-    restTime,
-    difficulty,
-    tags,
-    diet,
-    season,
-    budget
   }`,
 
   // About - Informations personnelles
@@ -385,6 +483,10 @@ export const queries = {
     },
     locationSectionTitle,
     locationSectionDescription,
+    locationGallery[]{
+      "url": asset->url,
+      alt
+    },
     restaurantSectionTitle,
     restaurantSectionDescription,
     ctaTitle,
@@ -414,7 +516,7 @@ export async function getRecipesData(): Promise<RecipeData[]> {
 
 export async function getRecipeBySlug(slug: string): Promise<RecipeData | null> {
   try {
-    return await sanityClient.fetch(queries.recipeBySlug(slug))
+    return await sanityClient.fetch(queries.recipeBySlug, { slug })
   } catch (error) {
     console.error('Erreur lors de la récupération de la recette:', error)
     return null
@@ -423,9 +525,38 @@ export async function getRecipeBySlug(slug: string): Promise<RecipeData | null> 
 
 export async function getRecipesByCategory(category: string): Promise<RecipeData[]> {
   try {
-    return await sanityClient.fetch(queries.recipesByCategory(category))
+    return await sanityClient.fetch(queries.recipesByCategory, { category })
   } catch (error) {
     console.error('Erreur lors de la récupération des recettes par catégorie:', error)
+    return []
+  }
+}
+
+
+export async function getPacksData(): Promise<PackData[]> {
+  try {
+    return await sanityClient.fetch(queries.packs)
+  } catch (error) {
+    console.error('Erreur lors de la récupération des packs:', error)
+    return []
+  }
+}
+
+export async function getPackById(id: string): Promise<PackData | null> {
+  try {
+    return await sanityClient.fetch(queries.packById, { id })
+  } catch (error) {
+    console.error('Erreur lors de la récupération du pack:', error)
+    return null
+  }
+}
+
+export async function getRecipesByPackIds(packIds: string[]): Promise<RecipeData[]> {
+  if (!packIds.length) return []
+  try {
+    return await sanityClient.fetch(queries.recipesByPackIds, { packIds })
+  } catch (error) {
+    console.error('Erreur lors de la récupération des recettes premium:', error)
     return []
   }
 }

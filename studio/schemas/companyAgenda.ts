@@ -7,20 +7,20 @@ export const companyAgenda = {
   fields: [
     {
       name: 'title',
-      title: 'Titre de l\'agenda',
+      title: 'Titre interne',
       type: 'string',
-      initialValue: 'Agenda des créneaux entreprises'
+      initialValue: 'Agenda entreprises'
     },
     {
       name: 'description',
-      title: 'Description',
+      title: 'Description interne',
       type: 'text',
       initialValue:
-        'Listez les créneaux disponibles pour les sociétés et actualisez les statuts directement depuis le studio.'
+        'Gérez les créneaux disponibles pour les entreprises (dates, horaires, statuts).'
     },
     {
       name: 'calendarTitle',
-      title: 'Titre du calendrier',
+      title: 'Titre visible sur le site',
       type: 'string',
       initialValue: 'Disponibilités entreprises'
     },

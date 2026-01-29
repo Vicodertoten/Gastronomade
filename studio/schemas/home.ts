@@ -14,74 +14,101 @@ export const home = {
       name: 'heroTitle',
       title: 'Titre principal',
       type: 'string',
-      initialValue: 'Gastronomade'
+      initialValue: 'Un lieu d’exception pour vos rencontres.',
+      description: 'Phrase principale affichée en haut de la page.'
     },
     {
       name: 'heroSubtitle',
-      title: 'Sous-titre principal',
+      title: 'Surtitre / kicker',
       type: 'text',
-      initialValue: 'Découvrez l\'art de manger vrai avec Muriel Cruysmans à Wavre'
+      initialValue: 'Gastronomade',
+      description: 'Petit texte au-dessus du titre (court).'
     },
     {
       name: 'heroDescription',
-      title: 'Description sous le sous-titre',
+      title: 'Description principale',
       type: 'text',
-      initialValue: 'Un espace chaleureux et inspirant pour vos événements, cours de cuisine et moments gourmands'
+      initialValue: 'À Wavre, à 1 km de la E411, Gastronomade accueille réunions, événements privés et dîners. Un cadre naturel, chaleureux et simple d’accès.',
+      description: 'Texte sous le titre (2 phrases max).'
     },
     {
       name: 'heroBackgroundImage',
       title: 'Image de fond du hero',
       type: 'image',
       options: { hotspot: true },
-      description: 'Texte net sur les côtés et transparent au centre pour la première section.'
+      description: 'Image large. Le texte reste lisible grâce au dégradé.'
     },
     {
       name: 'locationSectionTitle',
-      title: 'Titre section location',
+      title: 'Titre section expériences',
       type: 'string',
-      initialValue: 'Location de l\'Espace "La Zboum"'
+      initialValue: 'Privatisation & restaurant éphémère',
+      description: 'Titre du bloc qui présente les deux offres.'
     },
     {
       name: 'locationSectionDescription',
-      title: 'Description section location',
+      title: 'Description section expériences',
       type: 'text',
-      initialValue: 'Un cadre inspirant pour vos réunions d\'entreprise, événements privés et soirées gourmandes'
+      initialValue: 'Deux offres complémentaires, un même esprit : chaleur, nature et cuisine sincère.',
+      description: 'Court paragraphe d’introduction.'
+    },
+    {
+      name: 'locationGallery',
+      title: 'Photos du lieu',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            {
+              name: 'alt',
+              title: 'Texte alternatif',
+              type: 'string'
+            }
+          ]
+        }
+      ],
+      description: 'Photos pour contextualiser le lieu sur la page d’accueil'
     },
     {
       name: 'restaurantSectionTitle',
       title: 'Titre section restaurant',
       type: 'string',
-      initialValue: 'Prochaines soirées Gastronomade'
+      initialValue: 'Le jeudi de Gastronomade'
     },
     {
       name: 'restaurantSectionDescription',
       title: 'Description section restaurant',
       type: 'text',
-      initialValue: 'Découvrez notre carte saisonnière et nos événements culinaires'
+      initialValue: 'Un menu végétal, créatif et de saison. La nature s’invite dans vos assiettes.'
     },
     {
       name: 'ctaTitle',
-      title: 'Titre section appel à l\'action',
+      title: 'Titre section À propos',
       type: 'string',
-      initialValue: 'Prêt à vivre une expérience gastronomique unique ?'
+      initialValue: 'L’histoire de Gastronomade',
+      description: 'Petit bloc en bas de page avec lien vers About.'
     },
     {
       name: 'ctaDescription',
-      title: 'Description section appel à l\'action',
+      title: 'Texte section À propos',
       type: 'text',
-      initialValue: 'Contactez Muriel pour réserver votre espace ou découvrir ses services'
+      initialValue: 'Gastronomade est né d’un rêve de famille. Muriel y partage sa cuisine végétale et son goût du vivant, dans un lieu chaleureux en pleine nature.'
     },
     {
       name: 'ctaPrimaryButton',
-      title: 'Texte bouton principal',
+      title: 'Texte bouton principal (lien About)',
       type: 'string',
-      initialValue: 'Me contacter'
+      initialValue: 'Découvrir notre histoire',
+      description: 'Bouton qui mène vers la page À propos.'
     },
     {
       name: 'ctaSecondaryButton',
-      title: 'Texte bouton secondaire',
+      title: 'Texte bouton secondaire (optionnel)',
       type: 'string',
-      initialValue: 'En savoir plus'
+      initialValue: 'En savoir plus',
+      description: 'Optionnel (non utilisé pour le moment).'
     }
   ]
 }

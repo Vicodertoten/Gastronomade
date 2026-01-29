@@ -7,10 +7,13 @@ from typing import List
 import requests
 
 # --- CONFIGURATION ---
-PROJECT_ID = "gjz41m8i"
-DATASET = "production"
-TOKEN = "skcJz0WGRUbi7a6MSloep6Onb9lk4AnM73aGjuG3TRAOBHM9mVVCvP68QZ5sZVfnNYY1TT9ZYJveyMygI76BvTe71jkHMyx7ISzTSyaOzYJjDKzofIeLekLm8Up0YJehJDbGDp6vYIzZpY3zxp2vT6feQQiCBxqUAriGykXVqYwYfhCRd16R"
-API_VERSION = "v2021-06-07"
+PROJECT_ID = os.getenv("SANITY_PROJECT_ID", "")
+DATASET = os.getenv("SANITY_DATASET", "production")
+TOKEN = os.getenv("SANITY_AUTH_TOKEN", "")
+API_VERSION = os.getenv("SANITY_API_VERSION", "v2021-06-07")
+
+if not PROJECT_ID or not TOKEN:
+    raise RuntimeError("SANITY_PROJECT_ID et SANITY_AUTH_TOKEN sont requis dans l'environnement.")
 
 BASE_URL = f"https://{PROJECT_ID}.api.sanity.io/{API_VERSION}"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
