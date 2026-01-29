@@ -26,9 +26,11 @@ npm run studio
 ### Technologies
 
 - **Framework**: Astro 5.x
-- **Styling**: Tailwind CSS 4.x
+- **Styling**: Tailwind CSS 3.x (project uses Tailwind v3.4.x)
 - **CMS**: Sanity
 - **Déploiement**: Netlify
+
+Note: `tailwind.config.js` is the canonical config for the project (archived `tailwind.config.mjs`).
 
 ### Structure du projet
 
@@ -154,7 +156,7 @@ SANITY_API_VERSION=2024-01-01
 
 ---
 
-**Site**: [gastronomade.be](https://gastronomade.be)
+**Site**: [murielcruysmans.com](https://www.murielcruysmans.com)
 **Contact**: muriel.cruysmans@gmail.com
 
 ### Cours & Coaching (about.astro)
